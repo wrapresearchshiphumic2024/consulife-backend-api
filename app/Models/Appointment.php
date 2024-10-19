@@ -9,6 +9,14 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'patient_id',
+        'psychologist_id',
+        'date',
+        'time',
+        'status',
+    ];
+
     public function patient()
     {
         return $this->belongsTo(Patient::class);
