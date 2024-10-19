@@ -18,3 +18,9 @@ Route::middleware('auth:sanctum', 'role:patient')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
+
+// For role admin
+Route::middleware('auth:sanctum', 'role:admin')->group(function () {
+    Route::get('profile', [AuthController::class, 'profile']);
+    Route::post('logout', [AuthController::class, 'logout']);
+});

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,6 +14,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'password_confirmation' => 'required|string',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -41,17 +43,32 @@ class AuthController extends Controller
     public function Register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:doctor,patient',
+            'phone_number' => 'required|string',
+            'role' => 'required|string|in:psychologists,patient',
+            'gender' => 'required|string|in:male,female,other',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
+        if ($request->hasFile('profile_picture')) {
+            $profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
+        } else {
+            $profile_picture = null;
+        }
+
         $user = new User();
-        $user->name = $request->name;
+        $user->id = (string) Str::uuid();
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
+        $user->phone_number = $request->phone_number;
         $user->role = $request->role;
+        $user->gender = $request->gender;
+        $user->profile_picture = $profile_picture;
         $user->save();
 
         return response()->json([
