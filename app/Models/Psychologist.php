@@ -9,20 +9,7 @@ class Psychologist extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'degree',
-        'major',
-        'university',
-        'graduation_year',
-        'language_major',
-        'certification_number',
-        'specialization',
-        'work_experience',
-        'cv',
-        'practice_license',
-        'is_verified',
-    ];
+    protected $guarded = ['id'];
 
     public function user()
     {
