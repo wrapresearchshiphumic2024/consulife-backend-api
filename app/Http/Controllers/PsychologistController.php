@@ -30,7 +30,7 @@ class PsychologistController extends Controller
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8',
             'phone_number' => 'required|string',
-            'gender' => 'required|string|',
+            'gender' => 'required|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'degree' => 'required|string|max:255',
             'major' => 'required|string|max:255',
