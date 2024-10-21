@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->id('user_id');
-            $table->timestamps();
             $table->foreignUuid('user_id')->references('id')->on('users');
+            $table->timestamps();
         });
     }
 
