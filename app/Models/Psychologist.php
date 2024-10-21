@@ -16,11 +16,6 @@ class Psychologist extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function availabilities()
-    {
-        return $this->hasMany(Schedule::class);
-    }
-
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
