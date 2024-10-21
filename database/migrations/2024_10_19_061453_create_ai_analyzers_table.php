@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_analyzers', function (Blueprint $table) {
             $table->id();
+            $table->text('complaint');
             $table->float('stress');
             $table->float('anxiety');
             $table->float('depression');

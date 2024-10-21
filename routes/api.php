@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PsychologistController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AIAnalyzerController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('register/psychologist', [AuthController::class, 'RegisterPsychologist']);
@@ -46,3 +47,10 @@ Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
 Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 Route::get('/appointments/psychologist/{psychologist_id}', [AppointmentController::class, 'getByPsychologist']);
 Route::get('/appointments/patient/{patient_id}', [AppointmentController::class, 'getByPatient']);
+
+//AI Analyzer routes
+Route::post('/ai-analysis/analyze', [AIAnalyzerController::class, 'analyzeText']);
+Route::get('/ai-analysis', [AIAnalyzerController::class, 'index']);
+Route::get('/ai-analysis/{id}', [AIAnalyzerController::class, 'show']);
+Route::delete('/ai-analysis/{id}', [AIAnalyzerController::class, 'destroy']);
+Route::get('/ai-analysis/patient/{patient_id}', [AIAnalyzerController::class, 'getByPatient']);
