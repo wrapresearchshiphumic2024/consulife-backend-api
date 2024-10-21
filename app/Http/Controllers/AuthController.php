@@ -48,7 +48,6 @@ class AuthController extends Controller
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8',
             'phone_number' => 'required|string',
-            'role' => 'required|string|in:psychologists,patient',
             'gender' => 'required|string|in:male,female,other',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -66,7 +65,7 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->phone_number = $request->phone_number;
-        $user->role = $request->role;
+        $user->role = 'patient';
         $user->gender = $request->gender;
         $user->profile_picture = $profile_picture;
         $user->save();
@@ -74,7 +73,6 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'User created successfully',
-            'data' => $user,
         ]);
     }
 
