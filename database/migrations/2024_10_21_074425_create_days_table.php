@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('days', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->references('id')->on('schedules');
+            $table->foreignId('schedule_id')->references('id')->on('schedules')->onDelete('cascade');
             $table->enum('day', ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']);
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps();

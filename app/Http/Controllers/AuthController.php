@@ -146,7 +146,7 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->phone_number = $request->phone_number;
-        $user->role = 'psychologists';
+        $user->role = 'psychologist';
         $user->gender = $request->gender;
         $user->profile_picture = $profile_picture;
         $user->save();

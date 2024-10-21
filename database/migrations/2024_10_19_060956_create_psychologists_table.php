@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('psychologists', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('user_id')->references('id')->on('users');
+            $table->foreignUuid('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('degree');
             $table->string('major');
             $table->string('university');

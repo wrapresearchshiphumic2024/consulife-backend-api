@@ -17,7 +17,7 @@ return new class extends Migration
             $table->float('anxiety');
             $table->float('depression');
             $table->timestamps();
-            $table->foreignId('patient_id')->references('id')->on('patients');
+            $table->foreignId('patient_id')->references('id')->on('patients')->onDelete('cascade');
         });
     }
 

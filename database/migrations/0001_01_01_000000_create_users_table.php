@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone_number');
-            $table->enum('role', ['psychologists', 'patient', 'admin']);
+            $table->enum('role', ['psychologist', 'patient', 'admin']);
             $table->string('gender');
             $table->string('profile_picture')->nullable();
             $table->rememberToken();

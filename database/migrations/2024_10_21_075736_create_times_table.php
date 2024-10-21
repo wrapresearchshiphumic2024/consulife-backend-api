@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('times', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('day_id')->references('id')->on('days');
+            $table->foreignId('day_id')->references('id')->on('days')->onDelete('cascade');
             $table->string('start');
             $table->string('end');
             $table->enum('status', ['active', 'inactive']);
