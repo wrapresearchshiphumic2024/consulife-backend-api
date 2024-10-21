@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('schedules', function (Blueprint $table) {
+        Schema::create('times', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('psychologist_id')->references('id')->on('pychologists');
+            $table->foreignId('day_id')->references('id')->on('days');
+            $table->string('start');
+            $table->string('end');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
         });
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::dropIfExists('times');
     }
 };
