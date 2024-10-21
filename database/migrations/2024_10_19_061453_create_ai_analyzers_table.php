@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('ai_analyzers', function (Blueprint $table) {
             $table->id();
-            $table->id('patient_id');
             $table->float('stress');
             $table->float('anxiety');
             $table->float('depression');
             $table->timestamps();
-            $table->foreignUuid('patient_id')->references('id')->on('patients');
+            $table->foreignId('patient_id')->references('id')->on('patients');
         });
     }
 

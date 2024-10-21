@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->id('patient_id');
-            $table->id('psychologist_id');
             $table->date('date');
             $table->time('time');
             $table->enum('status', ['waiting', 'ongoing', 'completed', 'canceled'])->default('waiting');
             $table->timestamps();
-            $table->foreignUuid('patient_id')->references('id')->on('patients');
-            $table->foreignUuid('psychologist_id')->references('id')->on('psychologists');
+            $table->foreignId('patient_id')->references('id')->on('patients');
+            $table->foreignId('psychologist_id')->references('id')->on('psychologists');
         });
     }
 

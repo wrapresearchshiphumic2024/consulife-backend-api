@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('psychologist_id')->references('id')->on('pychologists');
+            $table->foreignId('psychologist_id')->references('id')->on('psychologists');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
         });
