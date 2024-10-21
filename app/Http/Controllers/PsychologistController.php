@@ -95,7 +95,7 @@ class PsychologistController extends Controller
         $user_id = $user->id;
 
 
-        $psychologist = Psychologist::create([
+        Psychologist::create([
             'user_id' => $user_id,
             'degree' => $request->degree,
             'major' => $request->major,
@@ -111,7 +111,10 @@ class PsychologistController extends Controller
             'is_verified' => false,
         ]);
 
-        return response()->json(['message' => 'Psychologist created successfully', 'psychologist' => $psychologist], 201);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Psychologist created successfully'
+        ], 201);
     }
 
     /**
