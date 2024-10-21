@@ -14,16 +14,17 @@ class User extends Authenticatable
 {
     use  HasUuids, HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = [
-        'firstname',
-        'lastname',
-        'email',
-        'password',
-        'phone_number',
-        'role',
-        'gender',
-        'profile_picture',
-    ];
+    public function getIncrementing()
+    {
+        return false;
+    }
+
+    public function getKeyType()
+    {
+        return 'string';
+    }
+
+    protected $guarded = ['id'];
 
     protected $hidden = [
         'password',
@@ -46,5 +47,10 @@ class User extends Authenticatable
     public function isPatient()
     {
         return $this->role === 'patient';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }
