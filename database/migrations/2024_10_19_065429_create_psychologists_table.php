@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('psychologists', function (Blueprint $table) {
             $table->id();
-            $table->id('user_id');
+            $table->foreignUuid('user_id')->references('id')->on('users');
             $table->string('degree');
             $table->string('major');
             $table->string('university');
@@ -27,7 +27,6 @@ return new class extends Migration
             $table->json('practice_license');
             $table->boolean('is_verified')->default(false);
             $table->timestamps();
-            $table->foreignUuid('user_id')->references('id')->on('users');
         });
     }
 
