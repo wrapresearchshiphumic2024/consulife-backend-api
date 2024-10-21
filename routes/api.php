@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PsychologistController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\AppointmentController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('register/psychologist', [AuthController::class, 'RegisterPsychologist']);
@@ -36,3 +37,12 @@ Route::put('/patients/{id}', [PatientController::class, 'update']);
 Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
 Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
 Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis']);
+
+// Appointment routes
+Route::get('/appointments', [AppointmentController::class, 'index']);
+Route::post('/appointments', [AppointmentController::class, 'store']);
+Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
+Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
+Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+Route::get('/appointments/psychologist/{psychologist_id}', [AppointmentController::class, 'getByPsychologist']);
+Route::get('/appointments/patient/{patient_id}', [AppointmentController::class, 'getByPatient']);
