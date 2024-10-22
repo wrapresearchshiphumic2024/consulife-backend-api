@@ -15,8 +15,8 @@ Route::post('login', [AuthController::class, 'login']);
 
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::middleware('role:psychologist')->group(function () {
-        Route::get('profile', [AuthController::class, 'profile']);
+    Route::middleware('role:psychologists')->group(function () {
+        Route::get('psychologist/analitics', [PsychologistController::class, 'getConsultationsByPsychologist']);
     });
 
     Route::middleware('role:patient')->group(function () {
@@ -24,12 +24,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::middleware('role:admin')->group(function () {
-        Route::get('profile', [AuthController::class, 'profile']);
-        Route::get('/admin/home', [AdminController::class, 'index']);
-        Route::get('/admin/psychologists', [AdminController::class, 'allPsychologists']);
-        Route::post('/admin/psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
-        Route::post('/admin/psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
-        Route::get('/admin/psychologists/{id}', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
+        Route::get('admin/profile', [AuthController::class, 'profile']);
+        Route::get('admin/home', [AdminController::class, 'index']);
+        Route::get('admin/psychologists', [AdminController::class, 'allPsychologists']);
+        Route::post('admin/psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
+        Route::post('admin/psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
+        Route::get('admin/psychologists/{id}', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
     });
 
     Route::post('logout', [AuthController::class, 'logout']);

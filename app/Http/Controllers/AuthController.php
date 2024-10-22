@@ -37,6 +37,7 @@ class AuthController extends Controller
             'data' => [
                 'access_token' => $token,
                 'token_type' => 'Bearer',
+                'role' => $user->role,
             ],
         ]);
     }
@@ -137,6 +138,14 @@ class AuthController extends Controller
             $profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
         } else {
             $profile_picture = null;
+        }
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $user = new User();

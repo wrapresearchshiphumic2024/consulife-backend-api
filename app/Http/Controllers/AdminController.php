@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\Psychologist;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -72,6 +73,11 @@ class AdminController extends Controller
 
         $psychologist->is_verified = true;
         $psychologist->save();
+
+        Schedule::create([
+            'psychologist_id' => $psychologist->id,
+            'status' => 'inactive',
+        ]);
 
         return response()->json([
             'status' => 'success',
