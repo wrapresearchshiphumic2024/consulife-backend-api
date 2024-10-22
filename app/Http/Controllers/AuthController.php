@@ -43,7 +43,17 @@ class AuthController extends Controller
 
     public function Register(Request $request)
     {
-        $request->validate([
+        // $request->validate([
+        //     'firstname' => 'required|string',
+        //     'lastname' => 'required|string',
+        //     'email' => 'required|string|email|unique:users,email',
+        //     'password' => 'required|string|min:8',
+        //     'phone_number' => 'required|string',
+        //     'gender' => 'required|string',
+        //     'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        // ]);
+
+        $validator = Validator::make($request->all(), [
             'firstname' => 'required|string',
             'lastname' => 'required|string',
             'email' => 'required|string|email|unique:users,email',
@@ -52,6 +62,14 @@ class AuthController extends Controller
             'gender' => 'required|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         if ($request->hasFile('profile_picture')) {
             $profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
