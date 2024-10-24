@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PsychologistController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PatientController;
-use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AIAnalyzerController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\PsychologistController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('register/psychologist', [AuthController::class, 'RegisterPsychologist']);
@@ -17,6 +18,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::middleware('role:psychologists')->group(function () {
         Route::get('psychologist/analitics', [PsychologistController::class, 'getConsultationsByPsychologist']);
+        Route::post('psychologist/create/schedule', [ScheduleController::class, 'storeDayAndTimes']);
     });
 
     Route::middleware('role:patient')->group(function () {

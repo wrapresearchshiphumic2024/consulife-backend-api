@@ -15,4 +15,9 @@ class Day extends Model
     {
         return $this->belongsTo(Schedule::class);
     }
+
+    public function times()
+    {
+        return $this->hasMany(Time::class, 'day_id', 'id');
+    }
 }
