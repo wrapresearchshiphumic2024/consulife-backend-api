@@ -6,6 +6,7 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Models\Appointment;
 use App\Models\AiAnalyzer;
+use App\Models\Psychologist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -57,6 +58,35 @@ class PatientController extends Controller
             'data' => $appointments,
         ]);
     }
+
+    /**
+     * Display All Psychologosts.
+     */
+    public function psychologist()
+    {
+        $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
+
+        $psychologists->transform(function ($psychologist) {
+            return [
+                'id' => $psychologist->id,
+                'profile_picture' => $psychologist->user->profile_picture,
+                'firstname' => $psychologist->user->firstname,
+                'lastname' => $psychologist->user->lastname,
+                'profesional_identification_number' => $psychologist->profesional_identification_number,
+                'degree' => $psychologist->degree,
+                'specialization' => $psychologist->specialization,
+                'work_experience' => $psychologist->work_experience,
+                'is_verified' => $psychologist->is_verified,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'List of Psychologists',
+            'data' => $psychologists,
+        ], 200);
+    }
+
 
     /**
      * Display AI analysis results for the specified patient.
