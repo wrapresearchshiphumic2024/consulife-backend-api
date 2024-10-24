@@ -21,14 +21,19 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid credentials',
-                'data' => null,
-            ], 401);
+                'message' => 'Email not found',
+            ], 404);
         }
 
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Incorrect password',
+            ], 401);
+        }
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -44,16 +49,6 @@ class AuthController extends Controller
 
     public function Register(Request $request)
     {
-        // $request->validate([
-        //     'firstname' => 'required|string',
-        //     'lastname' => 'required|string',
-        //     'email' => 'required|string|email|unique:users,email',
-        //     'password' => 'required|string|min:8',
-        //     'phone_number' => 'required|string',
-        //     'gender' => 'required|string',
-        //     'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        // ]);
-
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string',
             'lastname' => 'required|string',
