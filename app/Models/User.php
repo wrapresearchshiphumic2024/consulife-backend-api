@@ -39,9 +39,14 @@ class User extends Authenticatable
         ];
     }
 
+    public function psychologist()
+    {
+        return $this->hasOne(Psychologist::class, 'user_id', 'id');
+    }
+
     public function isPsychologist()
     {
-        return $this->role === 'psychologist';
+        return $this->role === 'psychologists';
     }
 
     public function isPatient()
@@ -52,5 +57,10 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }
