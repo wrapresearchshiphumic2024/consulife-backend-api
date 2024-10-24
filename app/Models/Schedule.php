@@ -23,9 +23,4 @@ class Schedule extends Model
     {
         return $this->hasMany(Day::class);
     }
-
-    public function days()
-    {
-        return $this->hasMany(Day::class);
-    }
 }
