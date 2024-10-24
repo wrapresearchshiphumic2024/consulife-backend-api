@@ -37,6 +37,21 @@ class PatientController extends Controller
         }
 
         $appointments = Appointment::where('patient_id', $patient->id)->get();
+        //find psychologist and patient details
+        $appointments->transform(function ($appointment) {
+            return [
+                'id' => $appointment->id,
+                'date' => $appointment->date,
+                'time' => $appointment->time,
+                'status' => $appointment->status,
+                'psychologist' => [
+                    'id' => $appointment->psychologist->id,
+                    'name' => $appointment->psychologist->user->firstname . ' ' . $appointment->psychologist->user->lastname,
+                    'email' => $appointment->psychologist->user->email,
+                    'phone_number' => $appointment->psychologist->user->phone_number,
+                ],
+            ];
+        });
         return response()->json([
             'status' => 'success',
             'data' => $appointments,

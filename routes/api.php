@@ -23,6 +23,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::middleware('role:patient')->group(function () {
         Route::get('profile', [AuthController::class, 'profile']);
+        // Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
     });
 
     Route::middleware('role:admin')->group(function () {
