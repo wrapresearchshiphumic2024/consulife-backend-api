@@ -11,8 +11,7 @@ class Schedule extends Model
 
     protected $fillable = [
         'psychologist_id',
-        'days',
-        'time',
+        'status'
     ];
 
     public function psychologist()
