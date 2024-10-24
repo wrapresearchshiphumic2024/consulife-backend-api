@@ -23,8 +23,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::middleware('role:patient')->group(function () {
         Route::get('profile', [AuthController::class, 'profile']);
-        Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
-        Route::get('/patients/psychologists-list', [PatientController::class, 'psychologist']);
+        Route::get('patients/{id}/appointments', [PatientController::class, 'appointments']);
+        Route::get('patients/psychologists-list', [PatientController::class, 'psychologist']);
+        Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
+        Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
     });
 
     Route::middleware('role:admin')->group(function () {
@@ -40,12 +42,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 });
 
 // Patients routes
-// Route::get('/patients', [PatientController::class, 'index']);
+Route::get('/patients', [PatientController::class, 'index']);
 // Route::get('/patients/{id}', [PatientController::class, 'show']);
 // Route::put('/patients/{id}', [PatientController::class, 'update']);
 // Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
-Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
-Route::get('/patients/psychologists-list', [PatientController::class, 'psychologist']);
+// Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
+// Route::get('patients/psychologists-list', [PatientController::class, 'psychologist']);
+// Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
+// Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
 Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis']);
 
 // Appointment routes

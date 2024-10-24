@@ -10,6 +10,8 @@ use App\Models\Psychologist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class PatientController extends Controller
 {
@@ -70,13 +72,16 @@ class PatientController extends Controller
             return [
                 'id' => $psychologist->id,
                 'profile_picture' => $psychologist->user->profile_picture,
-                'firstname' => $psychologist->user->firstname,
-                'lastname' => $psychologist->user->lastname,
-                'profesional_identification_number' => $psychologist->profesional_identification_number,
-                'degree' => $psychologist->degree,
+                // 'firstname' => $psychologist->user->firstname,
+                // 'lastname' => $psychologist->user->lastname,
+                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
+                'gender' => $psychologist->user->gender,
+                // 'profesional_identification_number' => $psychologist->profesional_identification_number,
+                // 'degree' => $psychologist->degree,
                 'specialization' => $psychologist->specialization,
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
+                'detail_url' => route('patients.psychologist.detail', ['id' => $psychologist->id]),
             ];
         });
 
@@ -85,6 +90,95 @@ class PatientController extends Controller
             'message' => 'List of Psychologists',
             'data' => $psychologists,
         ], 200);
+    }
+
+    public function psychologistDetail(string $id)
+    {
+        $psychologist = Psychologist::with('user')->where('id', $id)->get();
+        $psychologist->transform(function ($psychologist) {
+            return [
+                'id' => $psychologist->id,
+                'profile_picture' => $psychologist->user->profile_picture,
+                // 'firstname' => $psychologist->user->firstname,
+                // 'lastname' => $psychologist->user->lastname,
+                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
+                'gender' => $psychologist->user->gender,
+                // 'profesional_identification_number' => $psychologist->profesional_identification_number,
+                // 'degree' => $psychologist->degree,
+                'specialization' => $psychologist->specialization,
+                'work_experience' => $psychologist->work_experience,
+                'is_verified' => $psychologist->is_verified,
+                'book' => route('patients.psychologist.book', ['id' => $psychologist->id]),
+            ];
+        });
+        if (!$psychologist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Psychologist Details',
+            'data' => [
+                'psychologist' => $psychologist,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Book specified psychologist acording to the schedule that patient choose.
+     */
+    public function psychologistBook(Request $request, string $id)
+    {
+        $psychologist = Psychologist::find($id);
+        if (!$psychologist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist not found',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+            'time' => 'required',
+        ]);
+
+        if (!Auth::check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Login required',
+            ], 404);
+        }
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $userId = Auth::id();
+        $patient = Patient::where('user_id', $userId)->first();
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Patient not found',
+            ], 404);
+        }
+
+        $appointment = new Appointment();
+        $appointment->patient_id = $patient->id;
+        $appointment->psychologist_id = $psychologist->id;
+        $appointment->date = $request->date;
+        $appointment->time = $request->time;
+        $appointment->status = 'waiting';
+        $appointment->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appointment booked successfully',
+            'data' => $appointment,
+        ], 201);
     }
 
 
