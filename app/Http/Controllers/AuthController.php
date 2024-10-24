@@ -66,7 +66,7 @@ class AuthController extends Controller
             'gender' => 'required|string',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
