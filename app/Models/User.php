@@ -46,7 +46,7 @@ class User extends Authenticatable
 
     public function isPsychologist()
     {
-        return $this->role === 'psychologists';
+        return $this->role === 'psychologist';
     }
 
     public function isPatient()
