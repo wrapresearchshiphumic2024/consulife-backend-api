@@ -47,8 +47,8 @@ Route::get('/patients', [PatientController::class, 'index']);
 // Route::put('/patients/{id}', [PatientController::class, 'update']);
 // Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
 // Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
-// Route::get('patients/psychologists-list', [PatientController::class, 'psychologist']);
-// Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
+Route::get('patients/psychologists-list', [PatientController::class, 'psychologist']);
+Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
 // Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
 Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis']);
 

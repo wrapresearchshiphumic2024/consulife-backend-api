@@ -20,4 +20,9 @@ class Psychologist extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }

@@ -92,25 +92,14 @@ class PatientController extends Controller
         ], 200);
     }
 
+    /**
+     * Display specified psychologosts.
+     */
     public function psychologistDetail(string $id)
     {
-        $psychologist = Psychologist::with('user')->where('id', $id)->get();
-        $psychologist->transform(function ($psychologist) {
-            return [
-                'id' => $psychologist->id,
-                'profile_picture' => $psychologist->user->profile_picture,
-                // 'firstname' => $psychologist->user->firstname,
-                // 'lastname' => $psychologist->user->lastname,
-                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
-                'gender' => $psychologist->user->gender,
-                // 'profesional_identification_number' => $psychologist->profesional_identification_number,
-                // 'degree' => $psychologist->degree,
-                'specialization' => $psychologist->specialization,
-                'work_experience' => $psychologist->work_experience,
-                'is_verified' => $psychologist->is_verified,
-                'book' => route('patients.psychologist.book', ['id' => $psychologist->id]),
-            ];
-        });
+        // $psychologist = Psychologist::with('user')->where('id', $id)->get();
+        $psychologist = Psychologist::with(['user', 'schedules.days.times'])->where('id', $id)->first();
+        
         if (!$psychologist) {
             return response()->json([
                 'status' => 'error',
@@ -118,11 +107,34 @@ class PatientController extends Controller
             ], 404);
         }
 
+        $scheduleData = [];
+        foreach ($psychologist->schedules as $schedule) {
+            foreach ($schedule->days as $day) {
+                $scheduleData[] = [
+                    'day' => $day->day,
+                    'times' => $day->times->map(function ($time) {
+                        return [
+                            'start' => $time->start,
+                            'end' => $time->end,
+                        ];
+                    }),
+                ];
+            }
+        }
+        
         return response()->json([
             'status' => 'success',
             'message' => 'Psychologist Details',
             'data' => [
-                'psychologist' => $psychologist,
+                'id' => $psychologist->id,
+                'profile_picture' => $psychologist->user->profile_picture,
+                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
+                'gender' => $psychologist->user->gender,
+                'specialization' => $psychologist->specialization,
+                'work_experience' => $psychologist->work_experience,
+                'days_and_times' => $scheduleData,
+                'is_verified' => $psychologist->is_verified,
+                'book' => route('patients.psychologist.book', ['id' => $psychologist->id]),
             ],
         ], 200);
     }
