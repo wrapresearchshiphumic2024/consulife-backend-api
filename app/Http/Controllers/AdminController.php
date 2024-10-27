@@ -13,7 +13,7 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $psychologists = Psychologist::count();
+        $psychologists = Psychologist::where('is_verified', true)->count();
 
         $total_patient = Patient::count();
 
@@ -37,6 +37,7 @@ class AdminController extends Controller
     {
         $psychologists = Psychologist::with('user')
             ->where('is_verified', true)
+            ->where('is_rejected', false) 
             ->get();
 
         $psychologists->transform(function ($psychologist) {
@@ -65,8 +66,9 @@ class AdminController extends Controller
     public function notVerifiedPsychologists()
     {
         $psychologists = Psychologist::with('user')
-            ->where('is_verified', false)
-            ->get();
+        ->where('is_verified', false)
+        ->where('is_rejected', false) 
+        ->get();
 
         $psychologists->transform(function ($psychologist) {
             return [
