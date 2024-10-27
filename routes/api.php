@@ -36,9 +36,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('admin/home', [AdminController::class, 'index']);
         Route::get('admin/psychologists', [AdminController::class, 'verifiedPsychologists']);
         Route::get('admin/psychologists-notverified', [AdminController::class, 'notVerifiedPsychologists']);
-        Route::get('psychologists/approve/{id}', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
-        Route::get('psychologists/reject/{id}', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
-        Route::get('psychologists/detail/{id}', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
+        Route::get('psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
+        Route::get('psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
+        Route::get('psychologists/{id}/detail', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
     });
 
     Route::post('logout', [AuthController::class, 'logout']);
