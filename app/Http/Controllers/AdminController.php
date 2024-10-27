@@ -33,13 +33,16 @@ class AdminController extends Controller
         ], 200);
     }
 
-    public function allPsychologists()
+    public function verifiedPsychologists()
     {
-        $psychologists = Psychologist::with('user')->get();
+        $psychologists = Psychologist::with('user')
+            ->where('is_verified', true)
+            ->get();
 
         $psychologists->transform(function ($psychologist) {
             return [
                 'id' => $psychologist->id,
+                'user_id' => $psychologist->user->id,
                 'profile_picture' => $psychologist->user->profile_picture,
                 'firstname' => $psychologist->user->firstname,
                 'lastname' => $psychologist->user->lastname,
@@ -48,22 +51,53 @@ class AdminController extends Controller
                 'specialization' => $psychologist->specialization,
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
-                'approve_url' => route('psychologists.approve', ['id' => $psychologist->id]),
-                'reject_url' => route('psychologists.reject', ['id' => $psychologist->id]),
-                'detail_url' => route('psychologists.detail', ['id' => $psychologist->id]),
+                'detail_url' => route('psychologists.detail', ['id' => $psychologist->user->id]),
             ];
         });
 
         return response()->json([
             'status' => 'success',
-            'message' => 'List of psychologists',
+            'message' => 'List of verified psychologists',
+            'data' => $psychologists,
+        ], 200);
+    }
+
+    public function notVerifiedPsychologists()
+    {
+        $psychologists = Psychologist::with('user')
+            ->where('is_verified', false)
+            ->get();
+
+        $psychologists->transform(function ($psychologist) {
+            return [
+                'id' => $psychologist->id,  
+                'user_id' => $psychologist->user->id, 
+                'profile_picture' => $psychologist->user->profile_picture,
+                'firstname' => $psychologist->user->firstname,
+                'lastname' => $psychologist->user->lastname,
+                'profesional_identification_number' => $psychologist->profesional_identification_number,
+                'degree' => $psychologist->degree,
+                'specialization' => $psychologist->specialization,
+                'work_experience' => $psychologist->work_experience,
+                'is_verified' => $psychologist->is_verified,
+                'approve_url' => route('psychologists.approve', ['id' => $psychologist->user->id]), 
+                'reject_url' => route('psychologists.reject', ['id' => $psychologist->user->id]), 
+                'detail_url' => route('psychologists.detail', ['id' => $psychologist->user->id]),  
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'List of unverified psychologists',
             'data' => $psychologists,
         ], 200);
     }
 
     public function approvePsychologist(Request $request, string $id)
     {
-        $psychologist = Psychologist::find($id);
+        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+            $query->where('id', $id);
+        })->first();
 
         if (!$psychologist) {
             return response()->json([
@@ -80,8 +114,6 @@ class AdminController extends Controller
             'status' => 'inactive',
         ]);
 
-
-
         return response()->json([
             'status' => 'success',
             'message' => 'Psychologist approved successfully',
@@ -91,7 +123,9 @@ class AdminController extends Controller
 
     public function rejectPsychologist(Request $request, string $id)
     {
-        $psychologist = Psychologist::find($id);
+        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+            $query->where('id', $id);
+        })->first();
 
         if (!$psychologist) {
             return response()->json([
@@ -112,7 +146,9 @@ class AdminController extends Controller
 
     public function detailPsychologist(string $id)
     {
-        $psychologist = Psychologist::with('user')->find($id);
+        $psychologist = Psychologist::with('user')->whereHas('user', function($query) use ($id) {
+            $query->where('id', $id);
+        })->first();
 
         if (!$psychologist) {
             return response()->json([
@@ -121,14 +157,17 @@ class AdminController extends Controller
             ], 404);
         }
 
+        $psychologist->user_id = $psychologist->user->id;
+
+        if (!$psychologist->is_verified) {
+            $psychologist->approve_url = route('psychologists.approve', ['id' => $psychologist->user->id]);
+            $psychologist->reject_url = route('psychologists.reject', ['id' => $psychologist->user->id]);
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Psychologist details',
-            'data' => [
-                'psychologist' => $psychologist,
-                'approve_url' => route('psychologists.approve', ['id' => $psychologist->id]),
-                'reject_url' => route('psychologists.reject', ['id' => $psychologist->id]),
-            ],
+            'data' => $psychologist,
         ], 200);
     }
 
