@@ -18,20 +18,21 @@ class PatientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $patients = Patient::with('user')->get();
-        return response()->json([
-            'status' => 'success',
-            'data' => $patients,
-        ]);
-    }
+    // public function index()
+    // {
+    //     $patients = Patient::with('user')->get();
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $patients,
+    //     ]);
+    // }
     /**
      * Display all appointments for the specified patient.
      */
     public function appointments($id)
     {
-        $patient = Patient::find($id);
+        // Cari pasien berdasarkan user_id
+        $patient = Patient::where('user_id', $id)->first();
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
@@ -40,7 +41,6 @@ class PatientController extends Controller
         }
 
         $appointments = Appointment::where('patient_id', $patient->id)->get();
-        //find psychologist and patient details
         $appointments->transform(function ($appointment) {
             return [
                 'id' => $appointment->id,
@@ -61,6 +61,7 @@ class PatientController extends Controller
         ]);
     }
 
+
     /**
      * Display All Psychologosts.
      */
@@ -71,6 +72,7 @@ class PatientController extends Controller
         $psychologists->transform(function ($psychologist) {
             return [
                 'id' => $psychologist->id,
+                'user_id' => $psychologist->user->id,
                 'profile_picture' => $psychologist->user->profile_picture,
                 // 'firstname' => $psychologist->user->firstname,
                 // 'lastname' => $psychologist->user->lastname,
@@ -81,7 +83,7 @@ class PatientController extends Controller
                 'specialization' => $psychologist->specialization,
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
-                'detail_url' => route('patients.psychologist.detail', ['id' => $psychologist->id]),
+                'detail_url' => route('patients.psychologist.detail', ['id' => $psychologist->user->id]),
             ];
         });
 
@@ -98,7 +100,9 @@ class PatientController extends Controller
     public function psychologistDetail(string $id)
     {
         // $psychologist = Psychologist::with('user')->where('id', $id)->get();
-        $psychologist = Psychologist::with(['user', 'schedules.days.times'])->where('id', $id)->first();
+        $psychologist = Psychologist::with(['user', 'schedules.days.times'])->whereHas('user', function($query) use ($id) {
+            $query->where('id', $id);
+        })->first();
         
         if (!$psychologist) {
             return response()->json([
@@ -127,6 +131,7 @@ class PatientController extends Controller
             'message' => 'Psychologist Details',
             'data' => [
                 'id' => $psychologist->id,
+                'user_id' => $psychologist->user->id,
                 'profile_picture' => $psychologist->user->profile_picture,
                 'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
                 'gender' => $psychologist->user->gender,
@@ -134,7 +139,7 @@ class PatientController extends Controller
                 'work_experience' => $psychologist->work_experience,
                 'days_and_times' => $scheduleData,
                 'is_verified' => $psychologist->is_verified,
-                'book' => route('patients.psychologist.book', ['id' => $psychologist->id]),
+                'book' => route('patients.psychologist.book', ['id' => $psychologist->user->id]),
             ],
         ], 200);
     }
@@ -144,7 +149,9 @@ class PatientController extends Controller
      */
     public function psychologistBook(Request $request, string $id)
     {
-        $psychologist = Psychologist::find($id);
+        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+            $query->where('id', $id);
+        })->first();
         if (!$psychologist) {
             return response()->json([
                 'status' => 'error',
@@ -199,7 +206,7 @@ class PatientController extends Controller
      */
     public function aiAnalysis($id)
     {
-        $patient = Patient::find($id);
+        $patient = Patient::where('user_id', $id)->first();
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
@@ -234,21 +241,21 @@ class PatientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        $patient = Patient::with('user')->find($id);
-        if (!$patient) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Patient not found',
-            ], 404);
-        }
+    // public function show(string $id)
+    // {
+    //     $patient = Patient::with('user')->find($id);
+    //     if (!$patient) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Patient not found',
+    //         ], 404);
+    //     }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $patient,
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $patient,
+    //     ]);
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -263,7 +270,7 @@ class PatientController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $patient = Patient::find($id);
+        $patient = Patient::where('user_id', $id)->first();
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
@@ -284,7 +291,6 @@ class PatientController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Update user data
         $user = User::find($patient->user_id);
         if ($request->has('firstname')) $user->firstname = $request->firstname;
         if ($request->has('lastname')) $user->lastname = $request->lastname;
@@ -304,25 +310,25 @@ class PatientController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $patient = Patient::find($id);
-        if (!$patient) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Patient not found',
-            ], 404);
-        }
+    // public function destroy(string $id)
+    // {
+    //     $patient = Patient::find($id);
+    //     if (!$patient) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Patient not found',
+    //         ], 404);
+    //     }
 
-        // Delete associated user
-        $user = User::find($patient->user_id);
-        if ($user) {
-            $user->delete();
-        }
+    //     // Delete associated user
+    //     $user = User::find($patient->user_id);
+    //     if ($user) {
+    //         $user->delete();
+    //     }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Patient deleted successfully',
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Patient deleted successfully',
+    //     ]);
+    // }
 }
