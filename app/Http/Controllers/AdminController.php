@@ -80,6 +80,7 @@ class AdminController extends Controller
                 'specialization' => $psychologist->specialization,
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
+                'is_rejected' => $psychologist->is_rejected,
                 'approve_url' => route('psychologists.approve', ['id' => $psychologist->user->id]), 
                 'reject_url' => route('psychologists.reject', ['id' => $psychologist->user->id]), 
                 'detail_url' => route('psychologists.detail', ['id' => $psychologist->user->id]),  
@@ -135,6 +136,7 @@ class AdminController extends Controller
         }
 
         $psychologist->is_verified = false;
+        $psychologist->is_rejected = true;
         $psychologist->save();
 
         return response()->json([
