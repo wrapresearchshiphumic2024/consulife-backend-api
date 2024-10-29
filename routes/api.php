@@ -16,7 +16,7 @@ Route::post('login', [AuthController::class, 'login']);
 
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::middleware('role:psychologists')->group(function () {
+    Route::middleware('role:psychologist')->group(function () {
         Route::get('psychologist/analitics', [PsychologistController::class, 'getConsultationsByPsychologist']);
         Route::post('psychologist/create/schedule', [ScheduleController::class, 'storeDayAndTimes']);
         Route::put('psychologist/schedule/update', [ScheduleController::class, 'updateDaysAndTimes']);
