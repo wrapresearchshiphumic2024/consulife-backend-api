@@ -23,6 +23,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('psychologist/schedule', [ScheduleController::class, 'getPsychologistSchedule']);
         Route::post('psychologist/schedule/open', [ScheduleController::class, 'openSchedule']);
         Route::post('psychologist/schedule/close', [ScheduleController::class, 'closeSchedule']);
+        Route::get('psychologist/appointment-history', [ScheduleController::class, 'appoimentHistory']);
     });
 
     Route::middleware('role:patient')->group(function () {
