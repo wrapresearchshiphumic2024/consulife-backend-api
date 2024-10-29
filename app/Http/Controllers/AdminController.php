@@ -47,6 +47,7 @@ class AdminController extends Controller
                 'profile_picture' => $psychologist->user->profile_picture,
                 'firstname' => $psychologist->user->firstname,
                 'lastname' => $psychologist->user->lastname,
+                'gender' => $psychologist->user->gender,
                 'profesional_identification_number' => $psychologist->profesional_identification_number,
                 'degree' => $psychologist->degree,
                 'specialization' => $psychologist->specialization,

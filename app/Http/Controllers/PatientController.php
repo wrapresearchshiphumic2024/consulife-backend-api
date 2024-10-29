@@ -65,18 +65,23 @@ class PatientController extends Controller
     /**
      * Display All Psychologosts.
      */
-    public function psychologist()
+    public function psychologists()
     {
         $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
+        // $psychologists = Psychologist::with('user')
+        // ->where('is_verified', true)
+        // ->whereHas('schedules', function ($query) {
+        //     $query->where('status', 'active');
+        // })
+        // ->get();
 
         $psychologists->transform(function ($psychologist) {
             return [
                 'id' => $psychologist->id,
                 'user_id' => $psychologist->user->id,
                 'profile_picture' => $psychologist->user->profile_picture,
-                // 'firstname' => $psychologist->user->firstname,
-                // 'lastname' => $psychologist->user->lastname,
-                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
+                'firstname' => $psychologist->user->firstname,
+                'lastname' => $psychologist->user->lastname,
                 'gender' => $psychologist->user->gender,
                 // 'profesional_identification_number' => $psychologist->profesional_identification_number,
                 // 'degree' => $psychologist->degree,
@@ -126,21 +131,11 @@ class PatientController extends Controller
             }
         }
         
+        $psychologist->book = route('patients.psychologist.book', ['id' => $psychologist->user->id]);
         return response()->json([
             'status' => 'success',
             'message' => 'Psychologist Details',
-            'data' => [
-                'id' => $psychologist->id,
-                'user_id' => $psychologist->user->id,
-                'profile_picture' => $psychologist->user->profile_picture,
-                'name' => $psychologist->user->firstname . ' ' . $psychologist->user->lastname,
-                'gender' => $psychologist->user->gender,
-                'specialization' => $psychologist->specialization,
-                'work_experience' => $psychologist->work_experience,
-                'days_and_times' => $scheduleData,
-                'is_verified' => $psychologist->is_verified,
-                'book' => route('patients.psychologist.book', ['id' => $psychologist->user->id]),
-            ],
+            'data' => $psychologist,
         ], 200);
     }
 
