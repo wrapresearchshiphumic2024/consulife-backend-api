@@ -70,7 +70,7 @@ class PatientController extends Controller
         $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
         // $psychologists = Psychologist::with('user')
         // ->where('is_verified', true)
-        // ->whereHas('schedules', function ($query) {
+        // ->whereHas('schedule', function ($query) {
         //     $query->where('status', 'active');
         // })
         // ->get();
@@ -105,7 +105,7 @@ class PatientController extends Controller
     public function psychologistDetail(string $id)
     {
         // $psychologist = Psychologist::with('user')->where('id', $id)->get();
-        $psychologist = Psychologist::with(['user', 'schedules.days.times'])->whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::with(['user', 'schedule.days.times'])->whereHas('user', function($query) use ($id) {
             $query->where('id', $id);
         })->first();
         
@@ -117,8 +117,8 @@ class PatientController extends Controller
         }
 
         $scheduleData = [];
-        foreach ($psychologist->schedules as $schedule) {
-            foreach ($schedule->days as $day) {
+        if ($psychologist->schedule) {
+            foreach ($psychologist->schedule->days as $day) {
                 $scheduleData[] = [
                     'day' => $day->day,
                     'times' => $day->times->map(function ($time) {
