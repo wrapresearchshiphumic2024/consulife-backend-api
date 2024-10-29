@@ -204,4 +204,26 @@ class ScheduleController extends Controller
             'message' => 'Schedule closed successfully.'
         ]);
     }
+
+    public function appoimentHistory(Request $request)
+    {
+        $psychologist = Auth::user()->psychologist;
+
+        if (!$psychologist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist not found.'
+            ], 404);
+        }
+
+        $appointments = $psychologist->appointments()
+            ->with('patient.user')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appointments retrieved successfully',
+            'data' => $appointments
+        ]);
+    }
 }
