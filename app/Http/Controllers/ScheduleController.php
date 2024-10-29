@@ -164,4 +164,44 @@ class ScheduleController extends Controller
             ], 500);
         }
     }
+
+    public function openSchedule(Request $request)
+    {
+        $psychologist = Auth::user()->psychologist;
+
+        if (!$psychologist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist not found.'
+            ], 404);
+        }
+
+        Schedule::where('psychologist_id', $psychologist->id)
+            ->update(['status' => 'active']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Schedule opened successfully.'
+        ]);
+    }
+
+    public function closeSchedule(Request $request)
+    {
+        $psychologist = Auth::user()->psychologist;
+
+        if (!$psychologist) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist not found.'
+            ], 404);
+        }
+
+        Schedule::where('psychologist_id', $psychologist->id)
+            ->update(['status' => 'inactive']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Schedule closed successfully.'
+        ]);
+    }
 }
