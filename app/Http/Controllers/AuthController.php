@@ -212,10 +212,43 @@ class AuthController extends Controller
 
     public function Profile(Request $request)
     {
+        $user = $request->user();
+
+        if ($user->role === 'psychologist') {
+            $psychologist = $user->psychologist()->with('user')->first();
+    
+            if ($psychologist) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Psychologist details',
+                    'data' => [
+                        'user_id' => $user->id,
+                        'profile_picture' => $user->profile_picture,
+                        'firstname' => $user->firstname,
+                        'lastname' => $user->lastname,
+                        'email' => $user->email,
+                        'phone_number' => $user->phone_number,
+                        'degree' => $psychologist->degree,
+                        'major' => $psychologist->major,
+                        'university' => $psychologist->university,
+                        'graduation_year' => $psychologist->graduation_year,
+                        'language' => $psychologist->language,
+                        'certification' => $psychologist->certification,
+                        'specialization' => $psychologist->specialization,
+                        'work_experience' => $psychologist->work_experience,
+                        'profesional_identification_number' => $psychologist->profesional_identification_number,
+                        'cv' => $psychologist->cv,
+                        'practice_license' => $psychologist->practice_license,
+                        'is_verified' => $psychologist->is_verified,
+                    ],
+                ]);
+            }
+        }
+        
         return response()->json([
             'status' => 'success',
             'message' => 'User details',
-            'data' => $request->user(),
+            'data' => $user,
         ]);
     }
 

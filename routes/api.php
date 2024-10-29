@@ -16,6 +16,7 @@ Route::post('login', [AuthController::class, 'login']);
 
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('profile', [AuthController::class, 'profile']);
     Route::middleware('role:psychologist')->group(function () {
         Route::get('psychologist/analitics', [PsychologistController::class, 'getConsultationsByPsychologist']);
         Route::post('psychologist/create/schedule', [ScheduleController::class, 'storeDayAndTimes']);
@@ -24,7 +25,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::middleware('role:patient')->group(function () {
-        Route::get('profile', [AuthController::class, 'profile']);
         Route::get('patients/{id}/appointments', [PatientController::class, 'appointments']);
         Route::get('patients/psychologists-list', [PatientController::class, 'psychologist']);
         Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
