@@ -57,6 +57,8 @@
                 I love you sepenuh jiwa ❤️.
             </h3>
             <h3>HIHIHI 😍</h3>
+            <hr>
+            <a href="/api-documentation">API Documentation</a>
         </div>
     </div>
 </body>
