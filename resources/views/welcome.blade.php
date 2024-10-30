@@ -8,9 +8,46 @@
 </head>
 
 <body>
-    <div style="display: flex; align-items: center;">
-        <img src="images/images.jpeg" style="height: 98vh;">
-        <div style="margin-left: 20px;">
+    <style>
+        .responsive-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .responsive-container img {
+            height: 95vh;
+            max-width: 100%;
+            object-fit: cover;
+        }
+
+        .text-content {
+            margin-left: 20px;
+            max-width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .responsive-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .responsive-container img {
+                height: auto;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .text-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+
+    <div class="responsive-container">
+        <img src="images/images.jpeg" alt="Responsive Image">
+        <div class="text-content">
             <h1>MAU NGAPAIN BANG?</h1>
             <h2>LAGI MODE DEVELOP</h2>
             <h3>BACKEND NYA GANTENG BANGET</h3>
