@@ -97,9 +97,24 @@ class ScheduleController extends Controller
                 'times.*.end' => 'required|string'
             ]);
 
+            $updatedDays = $validatedData['days'];
+
+            // Find days not in the updated list and delete associated times
+            $daysToDelete = Day::where('schedule_id', $schedule->id)
+                ->whereNotIn('day', $updatedDays)
+                ->get();
+
+            foreach ($daysToDelete as $day) {
+                // Delete associated times for the day
+                Time::where('day_id', $day->id)->delete();
+                // Delete the day
+                $day->delete();
+            }
+
             $daysData = [];
 
-            foreach ($validatedData['days'] as $dayName) {
+            foreach ($updatedDays as $dayName) {
+                // Find existing day or create a new one if it doesn’t exist
                 $day = Day::where('schedule_id', $schedule->id)
                     ->where('day', $dayName)
                     ->first();
@@ -116,6 +131,7 @@ class ScheduleController extends Controller
                     ]);
                 }
 
+                // Delete existing times for the day
                 Time::where('day_id', $day->id)->delete();
 
                 $timesData = [];
@@ -149,35 +165,36 @@ class ScheduleController extends Controller
         }
     }
 
+
     public function getPsychologistSchedule()
     {
         try {
             $user = Auth::user();
 
-            if (!$user->isPsychologist()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized'
-                ], 403);
-            }
-
-            $psychologist = $user->psychologist;
-
-            if (!$psychologist) {
+            if (!$user->psychologist) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No psychologist profile found'
                 ], 404);
             }
 
-            $schedules = Schedule::where('psychologist_id', $psychologist->id)
+            $psychologist = $user->psychologist;
+
+            $schedule = Schedule::where('psychologist_id', $psychologist->id)
                 ->with(['days.times'])
-                ->get();
+                ->first();
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No schedule found for this psychologist'
+                ], 404);
+            }
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Schedules retrieved successfully',
-                'data' => $schedules
+                'message' => 'Schedule retrieved successfully',
+                'data' => $schedule
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
