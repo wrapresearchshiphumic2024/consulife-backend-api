@@ -33,10 +33,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::middleware('role:admin')->group(function () {
         Route::get('admin/profile', [AuthController::class, 'profile']);
         Route::get('admin/home', [AdminController::class, 'index']);
-        Route::get('admin/psychologists', [AdminController::class, 'allPsychologists']);
-        Route::post('admin/psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
-        Route::post('admin/psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
-        Route::get('admin/psychologists/{id}', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
+        Route::get('admin/psychologists', [AdminController::class, 'verifiedPsychologists']);
+        Route::get('admin/psychologists-notverified', [AdminController::class, 'notVerifiedPsychologists']);
+        Route::post('psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
+        Route::post('psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
+        Route::get('psychologists/{id}/detail', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
     });
 
     Route::post('logout', [AuthController::class, 'logout']);

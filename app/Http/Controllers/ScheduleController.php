@@ -14,8 +14,18 @@ class ScheduleController extends Controller
     public function storeDayAndTimes(Request $request)
     {
         try {
+            $psychologist = Auth::user()->psychologist;
+
+            $schedule = $psychologist->schedule;
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Schedule not found for this psychologist'
+                ], 404);
+            }
+
             $validatedData = $request->validate([
-                'schedule_id' => 'required|integer',
                 'days' => 'required|array',
                 'days.*' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
                 'times' => 'required|array',
@@ -27,7 +37,7 @@ class ScheduleController extends Controller
 
             foreach ($validatedData['days'] as $dayName) {
                 $day = Day::create([
-                    'schedule_id' => $validatedData['schedule_id'],
+                    'schedule_id' => $schedule->id,
                     'day' => $dayName,
                     'status' => 'active'
                 ]);
@@ -68,8 +78,18 @@ class ScheduleController extends Controller
     public function updateDaysAndTimes(Request $request)
     {
         try {
+            $psychologist = Auth::user()->psychologist;
+
+            $schedule = $psychologist->schedule;
+
+            if (!$schedule) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Schedule not found for this psychologist'
+                ], 404);
+            }
+
             $validatedData = $request->validate([
-                'schedule_id' => 'required|integer',
                 'days' => 'required|array',
                 'days.*' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
                 'times' => 'required|array',
@@ -77,14 +97,16 @@ class ScheduleController extends Controller
                 'times.*.end' => 'required|string'
             ]);
 
+            $daysData = [];
+
             foreach ($validatedData['days'] as $dayName) {
-                $day = Day::where('schedule_id', $validatedData['schedule_id'])
+                $day = Day::where('schedule_id', $schedule->id)
                     ->where('day', $dayName)
                     ->first();
 
                 if (!$day) {
                     $day = Day::create([
-                        'schedule_id' => $validatedData['schedule_id'],
+                        'schedule_id' => $schedule->id,
                         'day' => $dayName,
                         'status' => 'active'
                     ]);
