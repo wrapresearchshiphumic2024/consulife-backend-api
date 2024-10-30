@@ -99,22 +99,18 @@ class ScheduleController extends Controller
 
             $updatedDays = $validatedData['days'];
 
-            // Find days not in the updated list and delete associated times
             $daysToDelete = Day::where('schedule_id', $schedule->id)
                 ->whereNotIn('day', $updatedDays)
                 ->get();
 
             foreach ($daysToDelete as $day) {
-                // Delete associated times for the day
                 Time::where('day_id', $day->id)->delete();
-                // Delete the day
                 $day->delete();
             }
 
             $daysData = [];
 
             foreach ($updatedDays as $dayName) {
-                // Find existing day or create a new one if it doesn’t exist
                 $day = Day::where('schedule_id', $schedule->id)
                     ->where('day', $dayName)
                     ->first();
@@ -131,7 +127,6 @@ class ScheduleController extends Controller
                     ]);
                 }
 
-                // Delete existing times for the day
                 Time::where('day_id', $day->id)->delete();
 
                 $timesData = [];
