@@ -64,6 +64,7 @@ class PatientController extends Controller
                 'status' => $appointment->status,
                 'psychologist' => [
                     'id' => $appointment->psychologist->id,
+                    'user_id' => $appointment->psychologist->user->id,
                     'name' => $appointment->psychologist->user->firstname . ' ' . $appointment->psychologist->user->lastname,
                     'email' => $appointment->psychologist->user->email,
                     'phone_number' => $appointment->psychologist->user->phone_number,
