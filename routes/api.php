@@ -28,10 +28,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::middleware('role:patient')->group(function () {
-        Route::get('patients/{id}/appointments', [PatientController::class, 'appointments']);
+        Route::get('patients/appointments', [PatientController::class, 'appointments']);
         Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
-        Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail']);
-        Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook']);
+        Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
+        Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
     });
 
     Route::middleware('role:admin')->group(function () {

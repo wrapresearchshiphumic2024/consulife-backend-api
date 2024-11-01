@@ -29,10 +29,25 @@ class PatientController extends Controller
     /**
      * Display all appointments for the specified patient.
      */
-    public function appointments($id)
+    public function appointments()
     {
-        // Cari pasien berdasarkan user_id
-        $patient = Patient::where('user_id', $id)->first();
+        if (!Auth::check()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Login required',
+            ], 404);
+        }
+
+        $userId = Auth::id();
+        $patient = Patient::where('user_id', $userId)->first();
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Patient not found',
+            ], 404);
+        }
+        $patient = Patient::where('user_id', $userId)->first();
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
@@ -67,13 +82,13 @@ class PatientController extends Controller
      */
     public function psychologists()
     {
-        $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
-        // $psychologists = Psychologist::with('user')
-        // ->where('is_verified', true)
-        // ->whereHas('schedule', function ($query) {
-        //     $query->where('status', 'active');
-        // })
-        // ->get();
+        // $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
+        $psychologists = Psychologist::with('user')
+        ->where('is_verified', true)
+        ->whereHas('schedule', function ($query) {
+            $query->where('status', 'active');
+        })
+        ->get();
 
         $psychologists->transform(function ($psychologist) {
             return [
@@ -187,6 +202,18 @@ class PatientController extends Controller
         $appointment->time = $request->time;
         $appointment->status = 'waiting';
         $appointment->save();
+
+    // $dayOfWeek = strtolower(date('l', strtotime($request->date)));
+
+    // $day = $psychologist->schedule->days()->where('day', $dayOfWeek)->first();
+
+    // if ($day) {
+    //     $timeSlot = $day->times()->where('start', $request->time)->first();
+    //     if ($timeSlot) {
+    //         $timeSlot->status = 'inactive';
+    //         $timeSlot->save();
+    //     }
+    // }
 
         return response()->json([
             'status' => 'success',
