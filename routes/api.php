@@ -29,6 +29,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::middleware('role:patient')->group(function () {
         Route::get('patients/appointments', [PatientController::class, 'appointments']);
+        Route::get('patients/appointments/{id}/detail', [PatientController::class, 'appointmentDetail'])->name('patients.appointment.detail');
         Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
         Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
         Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');

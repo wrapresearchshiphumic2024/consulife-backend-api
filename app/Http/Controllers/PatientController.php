@@ -72,11 +72,55 @@ class PatientController extends Controller
                     'email' => $appointment->psychologist->user->email,
                     'phone_number' => $appointment->psychologist->user->phone_number,
                 ],
+                'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
         });
         return response()->json([
             'status' => 'success',
             'data' => $appointments,
+        ]);
+    }
+
+    /**
+     * Display the specified appointment.
+     */
+
+     public function appointmentDetail($id)
+    {
+        $appointment = Appointment::with(['psychologist.user'])->find($id);
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Appointment not found',
+            ], 404);
+        }
+
+        $psychologist = $appointment->psychologist;
+        $startTime = \Carbon\Carbon::parse($appointment->start_time);
+        $endTime = \Carbon\Carbon::parse($appointment->end_time);
+        $duration = $startTime->diffInMinutes($endTime); 
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appointment details',
+            'data' => [
+                'id' => $appointment->id,
+                'date' => $appointment->date,
+                'start_time' => $appointment->start_time,
+                'end_time' => $appointment->end_time,
+                'duration' => $duration . ' minutes',
+                'status' => $appointment->status,
+                'psychologist' => [
+                    'user_id' => $psychologist->user->id,
+                    'firstname' => $psychologist->user->firstname,
+                    'lastname' => $psychologist->user->lastname,
+                    'gender' => $psychologist->user->gender,
+                    'email' => $psychologist->user->email,
+                    'specialization' => $psychologist->specialization,
+                    'work_experience' => $psychologist->work_experience,
+                ]
+            ]
         ]);
     }
 
