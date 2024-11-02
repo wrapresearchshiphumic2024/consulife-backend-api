@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PatientController extends Controller
 {
@@ -60,12 +61,14 @@ class PatientController extends Controller
             return [
                 'id' => $appointment->id,
                 'date' => $appointment->date,
-                'time' => $appointment->time,
+                'start_time' => $appointment->start_time,
+                'end_time' => $appointment->end_time,
                 'status' => $appointment->status,
                 'psychologist' => [
                     'id' => $appointment->psychologist->id,
                     'user_id' => $appointment->psychologist->user->id,
-                    'name' => $appointment->psychologist->user->firstname . ' ' . $appointment->psychologist->user->lastname,
+                    'firstname' => $appointment->psychologist->user->firstname,
+                    'lastname' => $appointment->psychologist->user->lastname,
                     'email' => $appointment->psychologist->user->email,
                     'phone_number' => $appointment->psychologist->user->phone_number,
                 ],
@@ -160,9 +163,10 @@ class PatientController extends Controller
      */
     public function psychologistBook(Request $request, string $id)
     {
-        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::whereHas('user', function ($query) use ($id) {
             $query->where('id', $id);
         })->first();
+
         if (!$psychologist) {
             return response()->json([
                 'status' => 'error',
@@ -172,14 +176,15 @@ class PatientController extends Controller
 
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
-            'time' => 'required',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
         ]);
 
         if (!Auth::check()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Login required',
-            ], 404);
+            ], 401);
         }
 
         if ($validator->fails()) {
@@ -196,25 +201,53 @@ class PatientController extends Controller
             ], 404);
         }
 
+        $appointmentDate = $request->input('date');
+        $startTime = $request->input('start_time');
+        $endTime = $request->input('end_time');
+
+        $dayOfWeek = strtolower(date('l', strtotime($appointmentDate))); 
+
+        $daySchedule = $psychologist->schedule->days()->where('day', $dayOfWeek)->first();
+
+        if (!$daySchedule) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Psychologist is not available on the selected day.',
+            ], 422);
+        }
+
+        $timeAvailable = $daySchedule->times()
+            ->where('start', '<=', $startTime)
+            ->where('end', '>=', $endTime)
+            ->exists();
+
+        if (!$timeAvailable) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The selected time slot is not available.',
+            ], 422);
+        }
+
+        $existingAppointment = Appointment::where('psychologist_id', $psychologist->id)
+            ->where('date', $appointmentDate)
+            ->where('start_time', $startTime)
+            ->exists();
+
+        if ($existingAppointment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This time slot is already booked. Please select another time slot.',
+            ], 409);
+        }
+
         $appointment = new Appointment();
         $appointment->patient_id = $patient->id;
         $appointment->psychologist_id = $psychologist->id;
-        $appointment->date = $request->date;
-        $appointment->time = $request->time;
+        $appointment->date = $appointmentDate;
+        $appointment->start_time = $startTime;
+        $appointment->end_time = $endTime;
         $appointment->status = 'waiting';
         $appointment->save();
-
-    // $dayOfWeek = strtolower(date('l', strtotime($request->date)));
-
-    // $day = $psychologist->schedule->days()->where('day', $dayOfWeek)->first();
-
-    // if ($day) {
-    //     $timeSlot = $day->times()->where('start', $request->time)->first();
-    //     if ($timeSlot) {
-    //         $timeSlot->status = 'inactive';
-    //         $timeSlot->save();
-    //     }
-    // }
 
         return response()->json([
             'status' => 'success',
