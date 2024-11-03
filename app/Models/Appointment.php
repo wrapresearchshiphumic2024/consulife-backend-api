@@ -12,8 +12,10 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'psychologist_id',
+        'channel_id',
         'date',
-        'time',
+        'start_time',
+        'end_time',
         'status',
     ];
 

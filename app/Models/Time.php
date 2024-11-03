@@ -9,7 +9,7 @@ class Time extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['day_id', 'start', 'end', 'status'];
+    protected $fillable = ['day_id', 'start', 'end'];
 
     public function day()
     {

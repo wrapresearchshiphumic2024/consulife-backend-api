@@ -9,7 +9,7 @@ class Day extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['day', 'status', 'schedule_id'];
+    protected $fillable = ['day', 'schedule_id'];
 
     public function schedule()
     {

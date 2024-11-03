@@ -60,6 +60,7 @@ class PatientController extends Controller
         $appointments->transform(function ($appointment) {
             return [
                 'id' => $appointment->id,
+                'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
                 'start_time' => $appointment->start_time,
                 'end_time' => $appointment->end_time,
@@ -106,6 +107,7 @@ class PatientController extends Controller
             'message' => 'Appointment details',
             'data' => [
                 'id' => $appointment->id,
+                'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
                 'start_time' => $appointment->start_time,
                 'end_time' => $appointment->end_time,
@@ -193,12 +195,41 @@ class PatientController extends Controller
                 ];
             }
         }
+
+        $upcomingSchedules = [];
+        $startDate = \Carbon\Carbon::today();
+        $endDate = \Carbon\Carbon::today()->addWeeks(2);
+    
+        if ($psychologist->schedule) {
+            foreach ($psychologist->schedule->days as $day) {
+                $dayOfWeek = strtolower($day->day);
+                $currentDate = $startDate->copy();
+    
+                while ($currentDate <= $endDate) {
+                    if ($currentDate->format('l') === ucfirst($dayOfWeek)) {
+                        $upcomingSchedules[] = [
+                            'date' => $currentDate->toDateString(),
+                            'times' => $day->times->map(function ($time) use ($psychologist) {
+                                return [
+                                    'start' => $time->start,
+                                    'end' => $time->end,
+                                    'status' => $psychologist->schedule->status
+                                ];
+                            }),
+                        ];
+                    }
+                    $currentDate->addDay();
+                }
+            }
+        }
+    
         
         $psychologist->book = route('patients.psychologist.book', ['id' => $psychologist->user->id]);
         return response()->json([
             'status' => 'success',
             'message' => 'Psychologist Details',
             'data' => $psychologist,
+            'upcoming_schedules' => $upcomingSchedules,
         ], 200);
     }
 
@@ -219,6 +250,7 @@ class PatientController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'channel_id' => 'required|string',
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -287,6 +319,7 @@ class PatientController extends Controller
         $appointment = new Appointment();
         $appointment->patient_id = $patient->id;
         $appointment->psychologist_id = $psychologist->id;
+        $appointment->channel_id = $request->input('channel_id');
         $appointment->date = $appointmentDate;
         $appointment->start_time = $startTime;
         $appointment->end_time = $endTime;
