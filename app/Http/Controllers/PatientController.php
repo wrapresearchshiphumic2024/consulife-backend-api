@@ -196,11 +196,12 @@ class PatientController extends Controller
             }
         }
 
-        $startDate = now();
-        $endDate = now()->addWeeks(2);
-    
+        $startDate = today(); 
+        $endDate = today()->addWeeks(2);
+
         $upcomingAppointments = Appointment::where('psychologist_id', $psychologist->id)
             ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date') // Urutkan berdasarkan tanggal
             ->get(['date', 'start_time', 'end_time'])
             ->groupBy('date')
             ->map(function ($appointments, $date) {
@@ -211,7 +212,7 @@ class PatientController extends Controller
                             'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
                             'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
                         ];
-                    })
+                    })->values()
                 ];
             })
             ->values();
@@ -300,7 +301,14 @@ class PatientController extends Controller
 
         $existingAppointment = Appointment::where('psychologist_id', $psychologist->id)
             ->where('date', $appointmentDate)
-            ->where('start_time', $startTime)
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->whereBetween('start_time', [$startTime, $endTime])
+                    ->orWhereBetween('end_time', [$startTime, $endTime])
+                    ->orWhere(function ($query) use ($startTime, $endTime) {
+                        $query->where('start_time', '<=', $startTime)
+                            ->where('end_time', '>=', $endTime);
+                    });
+            })
             ->exists();
 
         if ($existingAppointment) {
