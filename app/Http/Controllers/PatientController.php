@@ -196,32 +196,13 @@ class PatientController extends Controller
             }
         }
 
-        $upcomingSchedules = [];
-        $startDate = \Carbon\Carbon::today();
-        $endDate = \Carbon\Carbon::today()->addWeeks(2);
+        $startDate = now();
+        $endDate = now()->addWeeks(2);
     
-        if ($psychologist->schedule) {
-            foreach ($psychologist->schedule->days as $day) {
-                $dayOfWeek = strtolower($day->day);
-                $currentDate = $startDate->copy();
-    
-                while ($currentDate <= $endDate) {
-                    if ($currentDate->format('l') === ucfirst($dayOfWeek)) {
-                        $upcomingSchedules[] = [
-                            'date' => $currentDate->toDateString(),
-                            'times' => $day->times->map(function ($time) use ($psychologist) {
-                                return [
-                                    'start' => $time->start,
-                                    'end' => $time->end,
-                                    'status' => $psychologist->schedule->status
-                                ];
-                            }),
-                        ];
-                    }
-                    $currentDate->addDay();
-                }
-            }
-        }
+        $upcomingAppointments = Appointment::where('psychologist_id', $psychologist->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get(['date', 'start_time', 'end_time']);
+
     
         
         $psychologist->book = route('patients.psychologist.book', ['id' => $psychologist->user->id]);
@@ -229,7 +210,7 @@ class PatientController extends Controller
             'status' => 'success',
             'message' => 'Psychologist Details',
             'data' => $psychologist,
-            'upcoming_schedules' => $upcomingSchedules,
+            'upcoming_appointments' => $upcomingAppointments,
         ], 200);
     }
 
