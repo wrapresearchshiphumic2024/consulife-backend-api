@@ -201,7 +201,20 @@ class PatientController extends Controller
     
         $upcomingAppointments = Appointment::where('psychologist_id', $psychologist->id)
             ->whereBetween('date', [$startDate, $endDate])
-            ->get(['date', 'start_time', 'end_time']);
+            ->get(['date', 'start_time', 'end_time'])
+            ->groupBy('date')
+            ->map(function ($appointments, $date) {
+                return [
+                    'date' => $date,
+                    'times' => $appointments->map(function ($appointment) {
+                        return [
+                            'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
+                            'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
+                        ];
+                    })
+                ];
+            })
+            ->values();
 
     
         
