@@ -53,7 +53,7 @@ class PatientController extends Controller
 
         $upcomingAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['waiting', 'ongoing']);
-        })->map(function ($appointment) {
+        })->sortByDesc('date')->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
@@ -75,7 +75,7 @@ class PatientController extends Controller
 
         $historyAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['completed', 'canceled']);
-        })->map(function ($appointment) {
+        })->sortByDesc('date')->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
@@ -120,11 +120,10 @@ class PatientController extends Controller
         }
 
         $psychologist = $appointment->psychologist;
-        $startTime = \Carbon\Carbon::parse($appointment->start_time); // Parse start_time as Carbon object
-        $endTime = \Carbon\Carbon::parse($appointment->end_time); // Parse end_time as Carbon object
+        $startTime = \Carbon\Carbon::parse($appointment->start_time);
+        $endTime = \Carbon\Carbon::parse($appointment->end_time);
         $duration = $startTime->diffInMinutes($endTime);
 
-        // Set message based on appointment status
         $message = '';
         switch ($appointment->status) {
             case 'waiting':
@@ -151,8 +150,8 @@ class PatientController extends Controller
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
-                'start_time' => $startTime->format('H:i'), // Format start_time
-                'end_time' => $endTime->format('H:i'), // Format end_time
+                'start_time' => $startTime->format('H:i'),
+                'end_time' => $endTime->format('H:i'),
                 'duration' => $duration . ' minutes',
                 'status' => $appointment->status,
                 'psychologist' => [
