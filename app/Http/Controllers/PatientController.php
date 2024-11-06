@@ -48,16 +48,12 @@ class PatientController extends Controller
                 'message' => 'Patient not found',
             ], 404);
         }
-        $patient = Patient::where('user_id', $userId)->first();
-        if (!$patient) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Patient not found',
-            ], 404);
-        }
 
         $appointments = Appointment::where('patient_id', $patient->id)->get();
-        $appointments->transform(function ($appointment) {
+
+        $upcomingAppointments = $appointments->filter(function ($appointment) {
+            return in_array($appointment->status, ['waiting', 'ongoing']);
+        })->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
@@ -75,10 +71,36 @@ class PatientController extends Controller
                 ],
                 'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
-        });
+        })->values();
+
+        $historyAppointments = $appointments->filter(function ($appointment) {
+            return in_array($appointment->status, ['completed', 'canceled']);
+        })->map(function ($appointment) {
+            return [
+                'id' => $appointment->id,
+                'channel_id' => $appointment->channel_id,
+                'date' => $appointment->date,
+                'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
+                'status' => $appointment->status,
+                'psychologist' => [
+                    'id' => $appointment->psychologist->id,
+                    'user_id' => $appointment->psychologist->user->id,
+                    'firstname' => $appointment->psychologist->user->firstname,
+                    'lastname' => $appointment->psychologist->user->lastname,
+                    'email' => $appointment->psychologist->user->email,
+                    'phone_number' => $appointment->psychologist->user->phone_number,
+                ],
+                'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
+            ];
+        })->values();
+
         return response()->json([
             'status' => 'success',
-            'data' => $appointments,
+            'data' => [
+                'upcoming_appointments' => $upcomingAppointments,
+                'history' => $historyAppointments,
+            ],
         ]);
     }
 
@@ -98,19 +120,39 @@ class PatientController extends Controller
         }
 
         $psychologist = $appointment->psychologist;
-        $startTime = \Carbon\Carbon::parse($appointment->start_time);
-        $endTime = \Carbon\Carbon::parse($appointment->end_time);
-        $duration = $startTime->diffInMinutes($endTime); 
+        $startTime = \Carbon\Carbon::parse($appointment->start_time); // Parse start_time as Carbon object
+        $endTime = \Carbon\Carbon::parse($appointment->end_time); // Parse end_time as Carbon object
+        $duration = $startTime->diffInMinutes($endTime);
+
+        // Set message based on appointment status
+        $message = '';
+        switch ($appointment->status) {
+            case 'waiting':
+                $message = 'Make sure you have a stable internet connection and are in a quiet place during the consultation session.';
+                break;
+            case 'ongoing':
+                $message = 'You have an ongoing session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '.';
+                break;
+            case 'completed':
+                $message = 'You have successfully completed a consultation session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '. This session is now considered complete.';
+                break;
+            case 'canceled':
+                $message = 'Your Appointment has been Canceled by the Psychologist';
+                break;
+            default:
+                $message = 'Appointment details';
+                break;
+        }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Appointment details',
+            'message' => $message,
             'data' => [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
-                'start_time' => $appointment->start_time,
-                'end_time' => $appointment->end_time,
+                'start_time' => $startTime->format('H:i'), // Format start_time
+                'end_time' => $endTime->format('H:i'), // Format end_time
                 'duration' => $duration . ' minutes',
                 'status' => $appointment->status,
                 'psychologist' => [
