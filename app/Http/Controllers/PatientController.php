@@ -54,13 +54,17 @@ class PatientController extends Controller
         $now = \Carbon\Carbon::now();
 
         foreach ($appointments as $appointment) {
+            $appointmentStartDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->start_time);
             $appointmentEndDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->end_time);
-            
-            if ($appointment->status === 'waiting' || $appointment->status === 'ongoing') {
-                if ($now->greaterThan($appointmentEndDateTime)) {
-                    $appointment->status = 'completed';
-                    $appointment->save();
-                }
+
+            if ($appointment->status === 'waiting' && $now->between($appointmentStartDateTime, $appointmentEndDateTime)) {
+                $appointment->status = 'ongoing';
+                $appointment->save();
+            }
+
+            if (($appointment->status === 'waiting' || $appointment->status === 'ongoing') && $now->greaterThan($appointmentEndDateTime)) {
+                $appointment->status = 'completed';
+                $appointment->save();
             }
         }
 
