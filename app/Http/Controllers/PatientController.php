@@ -51,6 +51,19 @@ class PatientController extends Controller
 
         $appointments = Appointment::where('patient_id', $patient->id)->get();
 
+        $now = \Carbon\Carbon::now();
+
+        foreach ($appointments as $appointment) {
+            $appointmentEndDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->end_time);
+            
+            if ($appointment->status === 'waiting' || $appointment->status === 'ongoing') {
+                if ($now->greaterThan($appointmentEndDateTime)) {
+                    $appointment->status = 'completed';
+                    $appointment->save();
+                }
+            }
+        }
+
         $upcomingAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['waiting', 'ongoing']);
         })->sortBy('date')->map(function ($appointment) {
