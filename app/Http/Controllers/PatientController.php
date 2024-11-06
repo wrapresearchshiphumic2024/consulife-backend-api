@@ -137,28 +137,28 @@ class PatientController extends Controller
         $endTime = \Carbon\Carbon::parse($appointment->end_time);
         $duration = $startTime->diffInMinutes($endTime);
 
-        $message = '';
+        $note = '';
         switch ($appointment->status) {
             case 'waiting':
-                $message = 'Make sure you have a stable internet connection and are in a quiet place during the consultation session.';
+                $note = 'Make sure you have a stable internet connection and are in a quiet place during the consultation session.';
                 break;
             case 'ongoing':
-                $message = 'You have an ongoing session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '.';
+                $note = 'You have an ongoing session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '.';
                 break;
             case 'completed':
-                $message = 'You have successfully completed a consultation session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '. This session is now considered complete.';
+                $note = 'You have successfully completed a consultation session with ' . $psychologist->user->firstname . ' ' . $psychologist->user->lastname . '. This session is now considered complete.';
                 break;
             case 'canceled':
-                $message = 'Your Appointment has been Canceled by the Psychologist';
+                $note = $appointment->note;
                 break;
             default:
-                $message = 'Appointment details';
+                $note = 'Appointment details';
                 break;
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => $message,
+            'message' => 'Appointment details',
             'data' => [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
@@ -167,6 +167,7 @@ class PatientController extends Controller
                 'end_time' => $endTime->format('H:i'),
                 'duration' => $duration . ' minutes',
                 'status' => $appointment->status,
+                'note' => $note,
                 'psychologist' => [
                     'user_id' => $psychologist->user->id,
                     'firstname' => $psychologist->user->firstname,
