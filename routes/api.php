@@ -19,6 +19,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::middleware('role:psychologist')->group(function () {
         Route::get('psychologist/analitics', [PsychologistController::class, 'getConsultationsByPsychologist']);
+        Route::get('psychologist/appointments-schedule', [PsychologistController::class, 'getAllPatientsByPsychologist']);
+        Route::post('psychologist/appointment-done/{id}', [PsychologistController::class, 'getDoneUrl'])->name('appointments.update.done');
+        Route::post('psychologist/appointment-cancel/{id}', [PsychologistController::class, 'getCancelUrl'])->name('appointments.update.cancel');
+        Route::post('psychologist/appointment-accept/{id}', [PsychologistController::class, 'getAcceptUrl'])->name('appointments.update.accept');
+        Route::post('psychologist/appointment/detail/{id}', [PsychologistController::class, 'getAppointmentDetails'])->name('appointments.detail');
         Route::post('psychologist/create/schedule', [ScheduleController::class, 'storeDayAndTimes']);
         Route::put('psychologist/schedule/update', [ScheduleController::class, 'updateDaysAndTimes']);
         Route::get('psychologist/schedule', [ScheduleController::class, 'getPsychologistSchedule']);
@@ -57,7 +62,7 @@ Route::get('/patients', [PatientController::class, 'index']);
 // Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
 // Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
 // Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
-Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis']);
+Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis'])->name('patients.ai-analysis');
 
 // Appointment routes
 Route::get('/appointments', [AppointmentController::class, 'index']);
