@@ -23,7 +23,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('psychologist/appointment-done/{id}', [PsychologistController::class, 'getDoneUrl'])->name('appointments.update.done');
         Route::post('psychologist/appointment-cancel/{id}', [PsychologistController::class, 'getCancelUrl'])->name('appointments.update.cancel');
         Route::post('psychologist/appointment-accept/{id}', [PsychologistController::class, 'getAcceptUrl'])->name('appointments.update.accept');
-        Route::post('psychologist/appointment/detail/{id}', [PsychologistController::class, 'getAppointmentDetails'])->name('appointments.detail');
+        Route::get('psychologist/appointment/detail/{id}', [PsychologistController::class, 'getAppointmentDetails'])->name('appointments.detail');
         Route::post('psychologist/create/schedule', [ScheduleController::class, 'storeDayAndTimes']);
         Route::put('psychologist/schedule/update', [ScheduleController::class, 'updateDaysAndTimes']);
         Route::get('psychologist/schedule', [ScheduleController::class, 'getPsychologistSchedule']);
