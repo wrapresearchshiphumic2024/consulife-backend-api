@@ -62,8 +62,8 @@ class PatientController extends Controller
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
-                'start_time' => $appointment->start_time,
-                'end_time' => $appointment->end_time,
+                'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
                 'status' => $appointment->status,
                 'psychologist' => [
                     'id' => $appointment->psychologist->id,
