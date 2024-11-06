@@ -53,7 +53,7 @@ class PatientController extends Controller
 
         $upcomingAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['waiting', 'ongoing']);
-        })->sortByDesc('date')->map(function ($appointment) {
+        })->sortBy('date')->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
