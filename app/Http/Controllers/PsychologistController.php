@@ -59,18 +59,20 @@ class PsychologistController extends Controller
 
     public function getAllPatientsByPsychologist()
     {
-        $psychologistId = Auth::id();
+        $psychologistId = Auth::user()->psychologist->id;
 
         $currentDate = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        $appointments = Appointment::with(['patient.user', 'psychologist.user'])
-            ->where('psychologist_id', $psychologistId)
+        $appointments = Appointment::where('psychologist_id', $psychologistId)
             ->get();
 
         $patients = $appointments->map(function ($appointment) use ($currentDate, $currentTime) {
-            if ($appointment->status === 'waiting' && $appointment->date->format('Y-m-d') === $currentDate && $appointment->time->format('H:i') === $currentTime) {
+            if ($appointment->status === 'waiting' && $appointment->date->format('Y-m-d') === $currentDate && $appointment->start_time->format('H:i') === $currentTime) {
                 $appointment->status = 'ongoing';
+                $appointment->save();
+            } elseif ($appointment->status === 'waiting' && $appointment->date->format('Y-m-d') === $currentDate && $appointment->end_time->format('H:i') === $currentTime) {
+                $appointment->status = 'completed';
                 $appointment->save();
             }
 
@@ -87,21 +89,21 @@ class PsychologistController extends Controller
 
             return [
                 'id' => $appointment->patient->user->id,
-                'name' => $appointment->patient->user->firstname . ' ' . $appointment->patient->user->lastname,
+                'fisrtname' => $appointment->patient->user->firstname,
+                'lastname' => $appointment->patient->user->lastname,
                 'phone' => $appointment->patient->user->phone_number,
                 'date' => $appointment->date,
-                'time' => $appointment->start_time . ' - ' . $appointment->end_time,
+                'start_time' => Carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => Carbon::parse($appointment->end_time)->format('H:i'),
                 'status' => $appointment->status,
             ] + $actionUrls;
         });
-
-        $groupedPatients = $patients->groupBy('status');
 
         return response()->json([
             'status' => 'success',
             'message' => 'Patients retrieved successfully',
             'data' => [
-                'patients' => $groupedPatients,
+                'patients' => $patients,
             ]
         ], 200);
     }
@@ -177,7 +179,7 @@ class PsychologistController extends Controller
 
     public function getAppointmentDetails($id)
     {
-        $appointment = Appointment::with(['patient.user', 'patient.aiAnalyzer'])->find($id);
+        $appointment = Appointment::with(['patient.user', 'patient.aiAnalyzers'])->find($id);
 
         if (!$appointment) {
             return response()->json([
@@ -186,7 +188,7 @@ class PsychologistController extends Controller
             ], 404);
         }
 
-        $latestAiAnalyzer = $appointment->patient->aiAnalyzer->sortByDesc('created_at')->first();
+        $latestAiAnalyzer = $appointment->patient->aiAnalyzers->sortByDesc('created_at')->first();
 
         return response()->json([
             'status' => 'success',

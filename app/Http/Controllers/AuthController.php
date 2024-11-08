@@ -48,7 +48,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Login successful',
             'data' => [
-                'user_id' => $user->id, 
+                'user_id' => $user->id,
                 'access_token' => $token,
                 'token_type' => 'Bearer',
                 'role' => $user->role,
@@ -120,7 +120,7 @@ class AuthController extends Controller
             'graduation_year' => 'required|digits:4',
             'language' => 'required|array',
             'certification' => 'required|array',
-            'certification.*' => 'required|file|mimes:pdf,jpg,png|max:2048',
+            'certification.*' => 'required|file|mimes:pdf,jpg,png|max:10048',
             'specialization' => 'required|array',
             'work_experience' => 'required|string',
             'profesional_identification_number' => 'required|string|max:255',
@@ -216,7 +216,7 @@ class AuthController extends Controller
 
         if ($user->role === 'psychologist') {
             $psychologist = $user->psychologist()->with('user')->first();
-    
+
             if ($psychologist) {
                 return response()->json([
                     'status' => 'success',
@@ -244,7 +244,7 @@ class AuthController extends Controller
                 ]);
             }
         }
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'User details',

@@ -253,6 +253,9 @@ class ScheduleController extends Controller
         $appointments = $psychologist->appointments()
             ->with('patient.user')
             ->get();
+        $appointments = $appointments->filter(function ($appointment) {
+            return in_array($appointment->status, ['completed', 'canceled']);
+        });
 
         return response()->json([
             'status' => 'success',
