@@ -38,45 +38,44 @@ class PatientController extends Controller
                 'message' => 'Login required',
             ], 404);
         }
-
+    
         $userId = Auth::id();
         $patient = Patient::where('user_id', $userId)->first();
-
+    
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Patient not found',
             ], 404);
         }
-
+    
         $appointments = Appointment::where('patient_id', $patient->id)->get();
-
-        $now = \Carbon\Carbon::now();
-
+        $now = \Carbon\Carbon::now('Asia/Jakarta'); 
+    
         foreach ($appointments as $appointment) {
-            $appointmentStartDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->start_time);
-            $appointmentEndDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->end_time);
-
+            $appointmentStartDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->start_time}", 'Asia/Jakarta');
+            $appointmentEndDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->end_time}", 'Asia/Jakarta');
+    
             if ($appointment->status === 'waiting' && $now->between($appointmentStartDateTime, $appointmentEndDateTime)) {
                 $appointment->status = 'ongoing';
                 $appointment->save();
-            }
-
-            if (($appointment->status === 'waiting' || $appointment->status === 'ongoing') && $now->greaterThan($appointmentEndDateTime)) {
+            } elseif (in_array($appointment->status, ['waiting', 'ongoing']) && $now->greaterThan($appointmentEndDateTime)) {
                 $appointment->status = 'completed';
                 $appointment->save();
             }
         }
-
+    
         $upcomingAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['waiting', 'ongoing']);
-        })->sortBy('date')->map(function ($appointment) {
+        })->sort(function ($a, $b) {
+            return ($a->date <=> $b->date) ?: ($a->start_time <=> $b->start_time);
+        })->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
-                'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
-                'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
+                'start_time' => \Carbon\Carbon::parse($appointment->start_time, 'Asia/Jakarta')->format('H:i'),
+                'end_time' => \Carbon\Carbon::parse($appointment->end_time, 'Asia/Jakarta')->format('H:i'),
                 'status' => $appointment->status,
                 'psychologist' => [
                     'id' => $appointment->psychologist->id,
@@ -89,16 +88,18 @@ class PatientController extends Controller
                 'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
         })->values();
-
+    
         $historyAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['completed', 'canceled']);
-        })->sortByDesc('date')->map(function ($appointment) {
+        })->sort(function ($a, $b) {
+            return ($b->date <=> $a->date) ?: ($b->start_time <=> $a->start_time);
+        })->map(function ($appointment) {
             return [
                 'id' => $appointment->id,
                 'channel_id' => $appointment->channel_id,
                 'date' => $appointment->date,
-                'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
-                'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
+                'start_time' => \Carbon\Carbon::parse($appointment->start_time, 'Asia/Jakarta')->format('H:i'),
+                'end_time' => \Carbon\Carbon::parse($appointment->end_time, 'Asia/Jakarta')->format('H:i'),
                 'status' => $appointment->status,
                 'psychologist' => [
                     'id' => $appointment->psychologist->id,
@@ -111,7 +112,7 @@ class PatientController extends Controller
                 'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
         })->values();
-
+    
         return response()->json([
             'status' => 'success',
             'data' => [
