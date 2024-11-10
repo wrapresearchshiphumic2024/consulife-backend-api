@@ -381,6 +381,92 @@
     </div>
 
     <div class="endpoint">
+      <h2>Get Psychologists List - <span class="code">GET /api/patients/psychologists-list</span></h2>
+      <p>Fetches a list of available psychologists for patients to view.</p>
+      <h3>Response:</h3>
+      <pre><code>{
+  "status": "success",
+  "message": "List of Psychologists",
+  "data": [
+    {
+      "id": 1,
+      "user_id": "0ee04692-6935-4df4-9414-ac943203da51",
+      "profile_picture": "url_to_profile_picture",
+      "firstname": "John",
+      "lastname": "Doe",
+      "gender": "male",
+      "specialization": "Clinical Psychology",
+      "work_experience": 5,
+      "is_verified": true,
+      "detail_url": "http://example.com/api/patients/psychologists/1"
+    }
+  ]
+}</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h2>Get Psychologist Detail - <span class="code">GET /api/patients/psychologists/{id}</span></h2>
+      <p>Fetches detailed information for a specific psychologist by ID.</p>
+      <h3>Parameters:</h3>
+      <ul>
+        <li><strong>id</strong>: integer (Psychologist ID)</li>
+      </ul>
+      <h3>Response:</h3>
+      <pre><code>{
+  "status": "success",
+  "message": "Psychologist details",
+  "data": {
+    "id": 1,
+    "user_id": "0ee04692-6935-4df4-9414-ac943203da51",
+    "profile_picture": "url_to_profile_picture",
+    "firstname": "John",
+    "lastname": "Doe",
+    "gender": "male",
+    "specialization": "Clinical Psychology",
+    "work_experience": 5,
+    "is_verified": true,
+    "upcoming_appointments": [
+      {
+        "date": "2024-11-10",
+        "times": [
+          { "start_time": "09:00", "end_time": "10:00" },
+          { "start_time": "11:00", "end_time": "12:00" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h2>Book a Psychologist - <span class="code">POST /api/patients/psychologists/{id}/book</span></h2>
+      <p>Books an appointment with a psychologist for the patient.</p>
+      <h3>Parameters:</h3>
+      <ul>
+        <li><strong>id</strong>: integer (Psychologist ID)</li>
+        <li><strong>channel_id</strong>: string (required, chat channel ID for session)</li>
+        <li><strong>date</strong>: string (required, date of appointment in YYYY-MM-DD)</li>
+        <li><strong>start_time</strong>: string (required, start time in HH:MM)</li>
+        <li><strong>end_time</strong>: string (required, end time in HH:MM, must be after start time)</li>
+      </ul>
+      <h3>Response:</h3>
+      <pre><code>{
+  "status": "success",
+  "message": "Appointment booked successfully",
+  "data": {
+    "id": 7,
+    "patient_id": 2,
+    "psychologist_id": 1,
+    "channel_id": "channel_id_example",
+    "date": "2024-11-10",
+    "start_time": "14:00",
+    "end_time": "15:00",
+    "status": "waiting"
+  }
+}</code></pre>
+    </div>
+
+    <div class="endpoint">
       <h2>Get AI Analysis Results - <span class="code">GET /api/patients/ai-analysis</span></h2>
       <p>Fetches AI analysis results for the authenticated patient.</p>
       <h3>Response:</h3>
