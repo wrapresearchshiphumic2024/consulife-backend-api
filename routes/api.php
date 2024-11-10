@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
         Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
         Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
+        Route::get('patients/ai-analysis', [PatientController::class, 'aiAnalysis']);
     });
 
     Route::middleware('role:admin')->group(function () {
@@ -52,36 +53,3 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 });
-
-// Patients routes
-Route::get('/patients', [PatientController::class, 'index']);
-// Route::get('/patients/{id}', [PatientController::class, 'show']);
-// Route::put('/patients/{id}', [PatientController::class, 'update']);
-// Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
-// Route::get('/patients/{id}/appointments', [PatientController::class, 'appointments']);
-// Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
-// Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
-// Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
-Route::get('/patients/{id}/ai-analysis', [PatientController::class, 'aiAnalysis'])->name('patients.ai-analysis');
-
-// Appointment routes
-Route::get('/appointments', [AppointmentController::class, 'index']);
-Route::post('/appointments', [AppointmentController::class, 'store']);
-Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
-Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
-Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
-Route::get('/appointments/psychologist/{psychologist_id}', [AppointmentController::class, 'getByPsychologist']);
-Route::get('/appointments/patient/{patient_id}', [AppointmentController::class, 'getByPatient']);
-
-//AI Analyzer routes
-Route::post('/ai-analysis/analyze', [AIAnalyzerController::class, 'analyzeText']);
-Route::get('/ai-analysis', [AIAnalyzerController::class, 'index']);
-Route::get('/ai-analysis/{id}', [AIAnalyzerController::class, 'show']);
-Route::delete('/ai-analysis/{id}', [AIAnalyzerController::class, 'destroy']);
-Route::get('/ai-analysis/patient/{patient_id}', [AIAnalyzerController::class, 'getByPatient']);
-
-// Route::get('admin/psychologists', [AdminController::class, 'verifiedPsychologists']);
-// Route::get('admin/psychologists-notverified', [AdminController::class, 'notVerifiedPsychologists']);
-// Route::get('psychologists/{id}/approve', [AdminController::class, 'approvePsychologist'])->name('psychologists.approve');
-// Route::get('psychologists/{id}/reject', [AdminController::class, 'rejectPsychologist'])->name('psychologists.reject');
-// Route::get('psychologists/{id}/detail', [AdminController::class, 'detailPsychologist'])->name('psychologists.detail');
