@@ -178,15 +178,26 @@ class PatientController extends Controller
      */
     public function psychologists()
     {
-        // $psychologists = Psychologist::with('user')->where('is_verified', true)->get();
-        $psychologists = Psychologist::with('user')
-        ->where('is_verified', true)
-        ->whereHas('schedule', function ($query) {
-            $query->where('status', 'active');
-        })
-        ->get();
+        $userId = Auth::id();
+        $patient = Patient::where('user_id', $userId)->first();
 
-        $psychologists->transform(function ($psychologist) {
+        if (!$patient) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Patient not found',
+            ], 404);
+        }
+
+        $hasAiAnalysis = AiAnalyzer::where('patient_id', $patient->id)->exists();
+
+        $psychologists = Psychologist::with('user')
+            ->where('is_verified', true)
+            ->whereHas('schedule', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->get();
+
+        $psychologists->transform(function ($psychologist) use ($hasAiAnalysis) {
             return [
                 'id' => $psychologist->id,
                 'user_id' => $psychologist->user->id,
@@ -194,8 +205,6 @@ class PatientController extends Controller
                 'firstname' => $psychologist->user->firstname,
                 'lastname' => $psychologist->user->lastname,
                 'gender' => $psychologist->user->gender,
-                // 'profesional_identification_number' => $psychologist->profesional_identification_number,
-                // 'degree' => $psychologist->degree,
                 'specialization' => $psychologist->specialization,
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
@@ -206,6 +215,7 @@ class PatientController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'List of Psychologists',
+            'patient_has_aianalysis' => $hasAiAnalysis,
             'data' => $psychologists,
         ], 200);
     }
