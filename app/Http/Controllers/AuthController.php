@@ -42,6 +42,25 @@ class AuthController extends Controller
                 'message' => 'Incorrect password',
             ], 401);
         }
+
+        if ($user->role == 'psychologist') {
+            $psychologist = Psychologist::where('user_id', $user->id)->first();
+
+            if ($psychologist) {
+                if ($psychologist->is_rejected && !$psychologist->is_verified) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Your registration process has been rejected',
+                    ], 403);
+                } elseif (!$psychologist->is_rejected && !$psychologist->is_verified) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Your account is currently in the verification process',
+                    ], 403);
+                }
+            }
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -109,7 +128,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            'email' => 'required|string|email|unique:users,email',
+            'email' => 'required|string|email',
             'password' => 'required|string|min:8',
             'phone_number' => 'required|string',
             'gender' => 'required|string',
@@ -138,6 +157,33 @@ class AuthController extends Controller
             ], 422);
         }
 
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            $psychologist = Psychologist::where('user_id', $user->id)->first();
+
+            if ($psychologist && $psychologist->is_rejected) {
+                $psychologist->delete();
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Email already in use',
+                ], 409);
+            }
+        } else {
+            $user = new User();
+            $user->id = (string) Str::uuid();
+            $user->firstname = $request->firstname;
+            $user->lastname = $request->lastname;
+            $user->email = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->phone_number = $request->phone_number;
+            $user->role = 'psychologist';
+            $user->gender = $request->gender;
+            $user->profile_picture = $request->hasFile('profile_picture') ?
+                'storage/' . $request->file('profile_picture')->store('profile_pictures', 'public') : null;
+            $user->save();
+        }
 
         $certificationPaths = [];
         if ($request->hasFile('certification')) {
@@ -160,36 +206,8 @@ class AuthController extends Controller
             }
         }
 
-        if ($request->hasFile('profile_picture')) {
-            $profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
-        } else {
-            $profile_picture = null;
-        }
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $user = new User();
-        $user->id = (string) Str::uuid();
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->phone_number = $request->phone_number;
-        $user->role = 'psychologist';
-        $user->gender = $request->gender;
-        $user->profile_picture = $profile_picture;
-        $user->save();
-
-        $user_id = $user->id;
-
         Psychologist::create([
-            'user_id' => $user_id,
+            'user_id' => $user->id,
             'degree' => $request->degree,
             'major' => $request->major,
             'university' => $request->university,
@@ -202,13 +220,15 @@ class AuthController extends Controller
             'cv' => json_encode($cvPaths),
             'practice_license' => json_encode($practiceLicensePaths),
             'is_verified' => false,
+            'is_rejected' => false,
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Psychologist created successfully'
+            'message' => 'Psychologist registered successfully',
         ], 201);
     }
+
 
     public function Profile(Request $request)
     {
