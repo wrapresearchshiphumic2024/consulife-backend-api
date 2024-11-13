@@ -33,12 +33,21 @@ class AdminController extends Controller
         ], 200);
     }
 
-    public function verifiedPsychologists()
+    public function verifiedPsychologists(Request $request)
     {
-        $psychologists = Psychologist::with('user')
+        $psychologistsQuery = Psychologist::with('user')
             ->where('is_verified', true)
-            ->where('is_rejected', false) 
-            ->get();
+            ->where('is_rejected', false);
+
+        if ($request->has('name')) {
+            $name = $request->input('name');
+            $psychologistsQuery->whereHas('user', function ($query) use ($name) {
+                $query->where('firstname', 'like', "%{$name}%")
+                      ->orWhere('lastname', 'like', "%{$name}%");
+            });
+        }
+    
+        $psychologists = $psychologistsQuery->get();
 
         $psychologists->transform(function ($psychologist) {
             return [

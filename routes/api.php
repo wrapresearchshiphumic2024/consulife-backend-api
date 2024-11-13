@@ -30,6 +30,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('psychologist/schedule/open', [ScheduleController::class, 'openSchedule']);
         Route::post('psychologist/schedule/close', [ScheduleController::class, 'closeSchedule']);
         Route::get('psychologist/appointment-history', [ScheduleController::class, 'appoimentHistory']);
+        // Route::get('psychologist/patients/{patient_id}/ai-analysis', [AIAnalyzerController::class, 'getByPatient'])->name('patients.ai-analysis');
     });
 
     Route::middleware('role:patient')->group(function () {
@@ -39,6 +40,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
         Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
         Route::get('patients/ai-analysis', [PatientController::class, 'aiAnalysis']);
+        // Route::get('patients/ai-analysis/history', [PatientController::class, 'aiAnalysis']);
     });
 
     Route::middleware('role:admin')->group(function () {

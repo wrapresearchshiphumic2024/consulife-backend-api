@@ -176,7 +176,7 @@ class PatientController extends Controller
     /**
      * Display All Psychologosts.
      */
-    public function psychologists()
+    public function psychologists(Request $request)
     {
         $userId = Auth::id();
         $patient = Patient::where('user_id', $userId)->first();
@@ -190,12 +190,28 @@ class PatientController extends Controller
 
         $hasAiAnalysis = AiAnalyzer::where('patient_id', $patient->id)->exists();
 
-        $psychologists = Psychologist::with('user')
+        $psychologistsQuery = Psychologist::with('user')
             ->where('is_verified', true)
             ->whereHas('schedule', function ($query) {
                 $query->where('status', 'active');
-            })
-            ->get();
+            });
+
+        if ($request->has('name')) {
+            $name = $request->input('name');
+            $psychologistsQuery->whereHas('user', function ($query) use ($name) {
+                $query->where('firstname', 'like', "%{$name}%")
+                      ->orWhere('lastname', 'like', "%{$name}%");
+            });
+        }
+    
+        if ($request->has('gender')) {
+            $gender = $request->input('gender');
+            $psychologistsQuery->whereHas('user', function ($query) use ($gender) {
+                $query->where('gender', $gender);
+            });
+        }
+
+        $psychologists = $psychologistsQuery->get();
 
         $psychologists->transform(function ($psychologist) use ($hasAiAnalysis) {
             return [
