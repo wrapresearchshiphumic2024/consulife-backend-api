@@ -16,10 +16,9 @@ class PsychologistController extends Controller
 {
     public function getConsultationsByPsychologist()
     {
-        $psychologistId = Auth::id();
+        $psychologistId = Auth::user()->psychologist->id;
 
-        $appointments = Appointment::with(['patient.user', 'psychologist.user'])
-            ->where('psychologist_id', $psychologistId)
+        $appointments = Appointment::where('psychologist_id', $psychologistId)
             ->whereIn('status', ['ongoing', 'waiting'])
             ->get();
 
@@ -62,7 +61,7 @@ class PsychologistController extends Controller
         $psychologistId = Auth::user()->psychologist->id;
 
         $currentDate = Carbon::now()->format('Y-m-d');
-        $currentTime = Carbon::now()->format('H:i');
+        $currentTime = Carbon::now('Asia/Jakarta');
 
         $appointments = Appointment::where('psychologist_id', $psychologistId)
             ->get();
