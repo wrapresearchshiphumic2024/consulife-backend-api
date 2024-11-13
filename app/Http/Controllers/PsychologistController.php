@@ -96,6 +96,7 @@ class PsychologistController extends Controller
                 'id' => $appointment->id,
                 'firstname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
+                'gender' => $appointment->patient->user->gender,
                 'phone' => $appointment->patient->user->phone_number,
                 'date' => $appointment->date,
                 'start_time' => Carbon::parse($appointment->start_time)->format('H:i'),
