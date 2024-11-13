@@ -37,9 +37,11 @@ class PsychologistController extends Controller
         $consultations = $appointments->map(function ($appointment) {
             return [
                 'id' => $appointment->patient->user->id,
-                'name' => $appointment->patient->user->firstname . ' ' . $appointment->patient->user->lastname,
+                'fisrtname' => $appointment->patient->user->firstname,
+                'lastname' => $appointment->patient->user->lastname,
                 'date' => $appointment->date,
-                'time' => $appointment->start_time . ' - ' . $appointment->end_time,
+                'start_time' => $appointment->start_time,
+                'end_time' => $appointment->end_time,
                 'status' => $appointment->status,
             ];
         });
@@ -60,17 +62,20 @@ class PsychologistController extends Controller
     {
         $psychologistId = Auth::user()->psychologist->id;
 
-        $currentDate = Carbon::now()->format('Y-m-d');
-        $currentTime = Carbon::now('Asia/Jakarta');
+        $now = Carbon::now('Asia/Jakarta');
 
         $appointments = Appointment::where('psychologist_id', $psychologistId)
+            ->whereIn('status', ['waiting', 'ongoing'])
             ->get();
 
-        $patients = $appointments->map(function ($appointment) use ($currentDate, $currentTime) {
-            if ($appointment->status === 'waiting' && $appointment->date->format('Y-m-d') === $currentDate && $appointment->start_time->format('H:i') === $currentTime) {
+        $patients = $appointments->map(function ($appointment) use ($now) {
+            $appointmentStartDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->start_time}", 'Asia/Jakarta');
+            $appointmentEndDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->end_time}", 'Asia/Jakarta');
+
+            if ($appointment->status === 'waiting' && $now->between($appointmentStartDateTime, $appointmentEndDateTime)) {
                 $appointment->status = 'ongoing';
                 $appointment->save();
-            } elseif ($appointment->status === 'waiting' && $appointment->date->format('Y-m-d') === $currentDate && $appointment->end_time->format('H:i') === $currentTime) {
+            } elseif (in_array($appointment->status, ['waiting', 'ongoing']) && $now->greaterThan($appointmentEndDateTime)) {
                 $appointment->status = 'completed';
                 $appointment->save();
             }
