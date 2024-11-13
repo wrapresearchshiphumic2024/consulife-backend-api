@@ -40,9 +40,10 @@ class PsychologistController extends Controller
                 'fisrtname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
                 'date' => $appointment->date,
-                'start_time' => $appointment->start_time,
-                'end_time' => $appointment->end_time,
+                'start_time' => Carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => Carbon::parse($appointment->end_time)->format('H:i'),
                 'status' => $appointment->status,
+                'detail_url' => route('appointments.detail', ['id' => $appointment->id]),
             ];
         });
 
