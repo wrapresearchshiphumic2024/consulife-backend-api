@@ -20,7 +20,7 @@ class PsychologistController extends Controller
 
         $appointments = Appointment::with(['patient.user', 'psychologist.user'])
             ->where('psychologist_id', $psychologistId)
-            ->where('status', 'ongoing')
+            ->whereIn('status', ['ongoing', 'waiting'])
             ->get();
 
         $totalweeklyConsultation = Appointment::where('psychologist_id', $psychologistId)
