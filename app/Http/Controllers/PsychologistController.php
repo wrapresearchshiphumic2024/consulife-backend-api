@@ -94,7 +94,7 @@ class PsychologistController extends Controller
 
             return [
                 'id' => $appointment->patient->user->id,
-                'fisrtname' => $appointment->patient->user->firstname,
+                'firstname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
                 'phone' => $appointment->patient->user->phone_number,
                 'date' => $appointment->date,
