@@ -21,7 +21,7 @@ class AIAnalyzerController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $complaint = $request->complaint;  
+        $complaint = $request->complaint;
 
         // Kirim teks keluhan ke Flask API untuk dianalisis oleh model AI
         try {
@@ -37,11 +37,11 @@ class AIAnalyzerController extends Controller
             }
 
             $result = $response->json();  // Ambil hasil dari Flask API (stress, anxiety, depression)
-            
+
             // Simpan hasil analisis dan teks keluhan di database
             $analysis = AiAnalyzer::create([
                 'patient_id' => $request->patient_id,
-                'complaint' => $complaint,  
+                'complaint' => $complaint,
                 'stress' => $result['stress'],
                 'anxiety' => $result['anxiety'],
                 'depression' => $result['depression'],
@@ -52,7 +52,6 @@ class AIAnalyzerController extends Controller
                 'message' => 'Text analyzed successfully',
                 'data' => $analysis,
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -60,7 +59,7 @@ class AIAnalyzerController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -149,9 +148,9 @@ class AIAnalyzerController extends Controller
     /**
      * Get AI analysis results for a specific patient.
      */
-    public function getByPatient($patient_id)
+    public function getByPatient($id)
     {
-        $patient = Patient::find($patient_id);
+        $patient = Patient::find($id);
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
@@ -159,7 +158,7 @@ class AIAnalyzerController extends Controller
             ], 404);
         }
 
-        $analysis = AiAnalyzer::where('patient_id', $patient_id)->get();
+        $analysis = AiAnalyzer::where('patient_id', $id)->get();
         return response()->json([
             'status' => 'success',
             'data' => $analysis,

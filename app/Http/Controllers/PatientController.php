@@ -24,24 +24,24 @@ class PatientController extends Controller
                 'message' => 'Login required',
             ], 404);
         }
-    
+
         $userId = Auth::id();
         $patient = Patient::where('user_id', $userId)->first();
-    
+
         if (!$patient) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Patient not found',
             ], 404);
         }
-    
+
         $appointments = Appointment::where('patient_id', $patient->id)->get();
-        $now = \Carbon\Carbon::now('Asia/Jakarta'); 
-    
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+
         foreach ($appointments as $appointment) {
             $appointmentStartDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->start_time}", 'Asia/Jakarta');
             $appointmentEndDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', "{$appointment->date} {$appointment->end_time}", 'Asia/Jakarta');
-    
+
             if ($appointment->status === 'waiting' && $now->between($appointmentStartDateTime, $appointmentEndDateTime)) {
                 $appointment->status = 'ongoing';
                 $appointment->save();
@@ -50,7 +50,7 @@ class PatientController extends Controller
                 $appointment->save();
             }
         }
-    
+
         $upcomingAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['waiting', 'ongoing']);
         })->sort(function ($a, $b) {
@@ -74,7 +74,7 @@ class PatientController extends Controller
                 'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
         })->values();
-    
+
         $historyAppointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['completed', 'canceled']);
         })->sort(function ($a, $b) {
@@ -98,7 +98,7 @@ class PatientController extends Controller
                 'detail_url' => route('patients.appointment.detail', ['id' => $appointment->id]),
             ];
         })->values();
-    
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -112,7 +112,7 @@ class PatientController extends Controller
      * Display the specified appointment.
      */
 
-     public function appointmentDetail($id)
+    public function appointmentDetail($id)
     {
         $appointment = Appointment::with(['psychologist.user'])->find($id);
 
@@ -200,10 +200,10 @@ class PatientController extends Controller
             $name = $request->input('name');
             $psychologistsQuery->whereHas('user', function ($query) use ($name) {
                 $query->where('firstname', 'like', "%{$name}%")
-                      ->orWhere('lastname', 'like', "%{$name}%");
+                    ->orWhere('lastname', 'like', "%{$name}%");
             });
         }
-    
+
         if ($request->has('gender')) {
             $gender = $request->input('gender');
             $psychologistsQuery->whereHas('user', function ($query) use ($gender) {
@@ -242,10 +242,10 @@ class PatientController extends Controller
     public function psychologistDetail(string $id)
     {
         // $psychologist = Psychologist::with('user')->where('id', $id)->get();
-        $psychologist = Psychologist::with(['user', 'schedule.days.times'])->whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::with(['user', 'schedule.days.times'])->whereHas('user', function ($query) use ($id) {
             $query->where('id', $id);
         })->first();
-        
+
         if (!$psychologist) {
             return response()->json([
                 'status' => 'error',
@@ -268,7 +268,7 @@ class PatientController extends Controller
             }
         }
 
-        $startDate = today(); 
+        $startDate = today();
         $endDate = today()->addWeeks(2);
 
         $upcomingAppointments = Appointment::where('psychologist_id', $psychologist->id)
@@ -289,8 +289,8 @@ class PatientController extends Controller
             })
             ->values();
 
-    
-        
+
+
         $psychologist->book = route('patients.psychologist.book', ['id' => $psychologist->user->id]);
         return response()->json([
             'status' => 'success',
@@ -348,7 +348,7 @@ class PatientController extends Controller
         $startTime = $request->input('start_time');
         $endTime = $request->input('end_time');
 
-        $dayOfWeek = strtolower(date('l', strtotime($appointmentDate))); 
+        $dayOfWeek = strtolower(date('l', strtotime($appointmentDate)));
 
         $daySchedule = $psychologist->schedule->days()->where('day', $dayOfWeek)->first();
 
