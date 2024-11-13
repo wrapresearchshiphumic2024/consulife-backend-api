@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Log;
+use Carbon\Carbon;
 use App\Models\Patient;
 use App\Models\Schedule;
 use App\Models\Appointment;
@@ -14,12 +15,61 @@ class AdminController extends Controller
     public function index()
     {
         $psychologists = Psychologist::where('is_verified', true)->count();
-
         $total_patient = Patient::count();
-
         $ongoing_appointments = Appointment::where('status', 'pending')->count();
-
         $completed_appointments = Appointment::where('status', 'completed')->count();
+
+        $months = [
+            1 => "January",
+            2 => "February",
+            3 => "March",
+            4 => "April",
+            5 => "May",
+            6 => "June",
+            7 => "July",
+            8 => "August",
+            9 => "September",
+            10 => "October",
+            11 => "November",
+            12 => "December"
+        ];
+
+        $monthlyApproved = Psychologist::where('is_verified', true)
+            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
+            ->whereYear('updated_at', Carbon::now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month');
+
+        $monthlyRejected = Psychologist::where('is_verified', false)
+            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
+            ->whereYear('updated_at', Carbon::now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month');
+
+        $monthlyActivePatients = Appointment::selectRaw('MONTH(date) as month, COUNT(DISTINCT patient_id) as count')
+            ->whereYear('date', Carbon::now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month');
+
+        $monthlyData = [];
+        foreach ($months as $monthNumber => $monthName) {
+            $monthlyData[] = [
+                'month' => $monthName,
+                'accepted' => $monthlyApproved->get($monthNumber, 0),
+                'rejected' => $monthlyRejected->get($monthNumber, 0),
+            ];
+        }
+
+        $monthlyActivePatientData = [];
+        foreach ($months as $monthNumber => $monthName) {
+            $monthlyActivePatientData[] = [
+                'month' => $monthName,
+                'active_patients' => $monthlyActivePatients->get($monthNumber, 0),
+            ];
+        }
 
         return response()->json([
             'status' => 'success',
@@ -29,6 +79,8 @@ class AdminController extends Controller
                 'total_patient' => $total_patient,
                 'ongoing_appointments' => $ongoing_appointments,
                 'completed_appointments' => $completed_appointments,
+                'monthly_data_psychologist' => $monthlyData,
+                'monthly_data_patient' => $monthlyActivePatientData,
             ]
         ], 200);
     }
@@ -43,10 +95,10 @@ class AdminController extends Controller
             $name = $request->input('name');
             $psychologistsQuery->whereHas('user', function ($query) use ($name) {
                 $query->where('firstname', 'like', "%{$name}%")
-                      ->orWhere('lastname', 'like', "%{$name}%");
+                    ->orWhere('lastname', 'like', "%{$name}%");
             });
         }
-    
+
         $psychologists = $psychologistsQuery->get();
 
         $psychologists->transform(function ($psychologist) {
@@ -76,14 +128,14 @@ class AdminController extends Controller
     public function notVerifiedPsychologists()
     {
         $psychologists = Psychologist::with('user')
-        ->where('is_verified', false)
-        ->where('is_rejected', false) 
-        ->get();
+            ->where('is_verified', false)
+            ->where('is_rejected', false)
+            ->get();
 
         $psychologists->transform(function ($psychologist) {
             return [
-                'id' => $psychologist->id,  
-                'user_id' => $psychologist->user->id, 
+                'id' => $psychologist->id,
+                'user_id' => $psychologist->user->id,
                 'profile_picture' => $psychologist->user->profile_picture,
                 'firstname' => $psychologist->user->firstname,
                 'lastname' => $psychologist->user->lastname,
@@ -93,9 +145,9 @@ class AdminController extends Controller
                 'work_experience' => $psychologist->work_experience,
                 'is_verified' => $psychologist->is_verified,
                 'is_rejected' => $psychologist->is_rejected,
-                'approve_url' => route('psychologists.approve', ['id' => $psychologist->user->id]), 
-                'reject_url' => route('psychologists.reject', ['id' => $psychologist->user->id]), 
-                'detail_url' => route('psychologists.detail', ['id' => $psychologist->user->id]),  
+                'approve_url' => route('psychologists.approve', ['id' => $psychologist->user->id]),
+                'reject_url' => route('psychologists.reject', ['id' => $psychologist->user->id]),
+                'detail_url' => route('psychologists.detail', ['id' => $psychologist->user->id]),
             ];
         });
 
@@ -108,7 +160,7 @@ class AdminController extends Controller
 
     public function approvePsychologist(Request $request, string $id)
     {
-        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::whereHas('user', function ($query) use ($id) {
             $query->where('id', $id);
         })->first();
 
@@ -136,7 +188,7 @@ class AdminController extends Controller
 
     public function rejectPsychologist(Request $request, string $id)
     {
-        $psychologist = Psychologist::whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::whereHas('user', function ($query) use ($id) {
             $query->where('id', $id);
         })->first();
 
@@ -160,7 +212,7 @@ class AdminController extends Controller
 
     public function detailPsychologist(string $id)
     {
-        $psychologist = Psychologist::with('user')->whereHas('user', function($query) use ($id) {
+        $psychologist = Psychologist::with('user')->whereHas('user', function ($query) use ($id) {
             $query->where('id', $id);
         })->first();
 

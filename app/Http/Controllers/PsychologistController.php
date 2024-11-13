@@ -37,7 +37,7 @@ class PsychologistController extends Controller
         $consultations = $appointments->map(function ($appointment) {
             return [
                 'id' => $appointment->patient->user->id,
-                'fisrtname' => $appointment->patient->user->firstname,
+                'firstname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
                 'date' => $appointment->date,
                 'start_time' => Carbon::parse($appointment->start_time)->format('H:i'),
