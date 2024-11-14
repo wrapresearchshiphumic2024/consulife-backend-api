@@ -166,7 +166,7 @@ class PsychologistController extends Controller
         }
 
         $note = $request->input('note', null);
-        $appointment->status = 'cancelled';
+        $appointment->status = 'canceled';
 
         if ($note) {
             $appointment->note = $note;
@@ -207,8 +207,8 @@ class PsychologistController extends Controller
                 'phone' => $appointment->patient->user->phone_number,
                 'email' => $appointment->patient->user->email,
                 'date' => $appointment->date,
-                'start_time' => $appointment->start_time,
-                'end_time' => $appointment->end_time,
+                'start_time' => carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => carbon::parse($appointment->end_time)->format('H:i'),
                 'channel_id' => $appointment->channel_id,
                 'status' => $appointment->status,
                 'done_url' => route('appointments.update.done', ['id' => $appointment->id]),
