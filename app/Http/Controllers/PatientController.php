@@ -348,6 +348,16 @@ class PatientController extends Controller
         $startTime = $request->input('start_time');
         $endTime = $request->input('end_time');
 
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+        $appointmentStartDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i', "$appointmentDate $startTime", 'Asia/Jakarta');
+
+        if ($appointmentStartDateTime->lessThan($now)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You cannot book an appointment for a past time slot.',
+            ], 422);
+        }
+
         $dayOfWeek = strtolower(date('l', strtotime($appointmentDate)));
 
         $daySchedule = $psychologist->schedule->days()->where('day', $dayOfWeek)->first();
@@ -425,6 +435,7 @@ class PatientController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $analysis,
+            'aianalyze_history' => route('patients.aianalyze.history', ['id' => $patient->user->id]),
         ]);
     }
 }
