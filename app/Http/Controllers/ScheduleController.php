@@ -255,6 +255,30 @@ class ScheduleController extends Controller
             ->get();
         $appointments = $appointments->filter(function ($appointment) {
             return in_array($appointment->status, ['completed', 'canceled']);
+        })->map(function ($appointment) {
+            return [
+                'id' => $appointment->id,
+                'date' => $appointment->date,
+                'status' => $appointment->status,
+                'note' => $appointment->note,
+                'created_at' => $appointment->created_at,
+                'updated_at' => $appointment->updated_at,
+                'patient_id' => $appointment->patient_id,
+                'psychologist_id' => $appointment->psychologist_id,
+                'channel_id' => $appointment->channel_id,
+                'start_time' => \Carbon\Carbon::parse($appointment->start_time)->format('H:i'),
+                'end_time' => \Carbon\Carbon::parse($appointment->end_time)->format('H:i'),
+                'patient' => [
+                    'id' => $appointment->patient->id,
+                    'user_id' => $appointment->patient->user->id,
+                    'firstname' => $appointment->patient->user->firstname,
+                    'lastname' => $appointment->patient->user->lastname,
+                    'email' => $appointment->patient->user->email,
+                    'phone_number' => $appointment->patient->user->phone_number,
+                    'gender' => $appointment->patient->user->gender,
+                    'profile_picture' => $appointment->patient->user->profile_picture,
+                ],
+            ];
         });
 
         return response()->json([
@@ -263,4 +287,5 @@ class ScheduleController extends Controller
             'data' => $appointments
         ]);
     }
+
 }
