@@ -36,7 +36,8 @@ class PsychologistController extends Controller
 
         $consultations = $appointments->map(function ($appointment) {
             return [
-                'id' => $appointment->patient->user->id,
+                'appointment_id' => $appointment->id,
+                'patient_id' => $appointment->patient->user->id,
                 'firstname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
                 'date' => $appointment->date,
