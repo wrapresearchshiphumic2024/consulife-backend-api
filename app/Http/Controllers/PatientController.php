@@ -433,29 +433,33 @@ class PatientController extends Controller
         $validatedData = $request->validate([
             'text' => 'required|string|max:1000',
         ]);
-    
+
         $text = $validatedData['text'];
-    
+
         try {
             $response = Http::withOptions(['verify' => false])->post('https://localhost:5000/predict', [
                 'text' => $text,
             ]);
-    
+
             if ($response->successful()) {
                 $results = $response->json();
+
+                $formattedResults = array_map(function ($value) {
+                    return round($value * 100, 2);
+                }, $results);
 
                 $aiAnalyzer = new AiAnalyzer();
                 $aiAnalyzer->patient_id = $patient->id;
                 $aiAnalyzer->complaint = $text;
-                $aiAnalyzer->stress = $results['Stress'] ?? null;
-                $aiAnalyzer->anxiety = $results['Anxiety'] ?? null;
-                $aiAnalyzer->depression = $results['Depression'] ?? null;
+                $aiAnalyzer->stress = $formattedResults['Stress'] ?? null;
+                $aiAnalyzer->anxiety = $formattedResults['Anxiety'] ?? null;
+                $aiAnalyzer->depression = $formattedResults['Depression'] ?? null;
                 $aiAnalyzer->save();
-    
+
                 return response()->json([
                     'success' => true,
                     'complaint' => $text,
-                    'results' => $results,
+                    'results' => $formattedResults,
                 ]);
             } else {
                 return response()->json([
