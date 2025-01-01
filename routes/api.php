@@ -39,8 +39,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('patients/psychologists-list', [PatientController::class, 'psychologists']);
         Route::get('patients/psychologists/{id}', [PatientController::class, 'psychologistDetail'])->name('patients.psychologist.detail');
         Route::post('patients/psychologists/{id}/book', [PatientController::class, 'psychologistBook'])->name('patients.psychologist.book');
-        Route::get('patients/ai-analysis', [PatientController::class, 'aiAnalysis']);
-        // Route::get('patients/ai-analysis/history', [PatientController::class, 'aiAnalysis']);
+        Route::get('patients/ai-analysis-history', [PatientController::class, 'aiAnalysisHistory']);
+        Route::post('patients/ai-analyze-model-svm', [PatientController::class, 'aiAnalyzeSVM']);
     });
 
     Route::middleware('role:admin')->group(function () {

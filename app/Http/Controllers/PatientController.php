@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class PatientController extends Controller
 {
@@ -417,11 +418,66 @@ class PatientController extends Controller
         ], 201);
     }
 
+    /**
+     * Analyze text using the SVM model.
+     */
+    public function aiAnalyzeSVM(Request $request)
+    {
+        $patient = Patient::where('user_id', Auth::id())->first();
+        if (!$patient) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Patient not found.',
+            ], 404);
+        }
+        $validatedData = $request->validate([
+            'text' => 'required|string|max:1000',
+        ]);
+    
+        $text = $validatedData['text'];
+    
+        try {
+            $response = Http::withOptions(['verify' => false])->post('https://localhost:5000/predict', [
+                'text' => $text,
+            ]);
+    
+            if ($response->successful()) {
+                $results = $response->json();
+
+                $aiAnalyzer = new AiAnalyzer();
+                $aiAnalyzer->patient_id = $patient->id;
+                $aiAnalyzer->complaint = $text;
+                $aiAnalyzer->stress = $results['Stress'] ?? null;
+                $aiAnalyzer->anxiety = $results['Anxiety'] ?? null;
+                $aiAnalyzer->depression = $results['Depression'] ?? null;
+                $aiAnalyzer->save();
+    
+                return response()->json([
+                    'success' => true,
+                    'complaint' => $text,
+                    'results' => $results,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to process text analysis.',
+                    'error' => $response->body(),
+                ], $response->status());
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while analyzing the text.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     /**
-     * Display AI analysis results for the specified patient.
+     * Display AI analysis history for the specified patient.
      */
-    public function aiAnalysis()
+    public function aiAnalysisHistory()
     {
         $patient = Patient::where('user_id', Auth::id())->first();
         if (!$patient) {
@@ -434,8 +490,8 @@ class PatientController extends Controller
         $analysis = AiAnalyzer::where('patient_id', $patient->id)->get();
         return response()->json([
             'status' => 'success',
+            'user_id' => Auth::id(),
             'data' => $analysis,
-            'aianalyze_history' => route('patients.aianalyze.history', ['id' => $patient->user->id]),
         ]);
     }
 }
