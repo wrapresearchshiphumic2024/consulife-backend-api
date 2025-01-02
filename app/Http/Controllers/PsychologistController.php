@@ -211,6 +211,7 @@ class PsychologistController extends Controller
             'message' => 'Appointment retrieved successfully',
             'data' => [
                 'id' => $appointment->id,
+                'patient_id' => $appointment->patient->id,
                 'firstname' => $appointment->patient->user->firstname,
                 'lastname' => $appointment->patient->user->lastname,
                 'gender' => $appointment->patient->user->gender,
