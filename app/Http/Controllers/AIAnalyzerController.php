@@ -158,9 +158,20 @@ class AIAnalyzerController extends Controller
             ], 404);
         }
 
-        $analysis = AiAnalyzer::where('patient_id', $id)->get();
+        $analysis = AiAnalyzer::where('patient_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($analysis->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No AI analysis found for this patient',
+            ], 404);
+        }
+
         return response()->json([
             'status' => 'success',
+            'message' => 'AI analysis retrieved successfully',
             'data' => $analysis,
         ]);
     }
