@@ -491,7 +491,10 @@ class PatientController extends Controller
             ], 404);
         }
 
-        $analysis = AiAnalyzer::where('patient_id', $patient->id)->get();
+        $analysis = AiAnalyzer::where('patient_id', $patient->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json([
             'status' => 'success',
             'user_id' => Auth::id(),
