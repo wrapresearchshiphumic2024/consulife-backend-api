@@ -186,6 +186,8 @@ class PsychologistController extends Controller
 
     public function getAppointmentDetails($id)
     {
+        $psychologistId = Auth::user()->psychologist->id;
+
         $appointment = Appointment::with(['patient.user', 'patient.aiAnalyzers'])->find($id);
 
         if (!$appointment) {
@@ -193,6 +195,13 @@ class PsychologistController extends Controller
                 'status' => 'error',
                 'message' => 'Appointment not found',
             ], 404);
+        }
+
+        if ($appointment->psychologist_id !== $psychologistId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You do not have access to this appointment',
+            ], 403);
         }
 
         $latestAiAnalyzer = $appointment->patient->aiAnalyzers->sortByDesc('created_at')->first();
