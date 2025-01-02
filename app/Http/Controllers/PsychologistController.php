@@ -214,7 +214,7 @@ class PsychologistController extends Controller
                 'status' => $appointment->status,
                 'done_url' => route('appointments.update.done', ['id' => $appointment->id]),
                 'cancel_url' => route('appointments.update.cancel', ['id' => $appointment->id]),
-                'ai_analysis_url' => route('patients.ai-analysis', ['id' => $appointment->patient->user->id]),
+                'ai_analysis_url' => route('patients.ai-analysis', ['id' => $appointment->patient->aiAnalyzers->id]),
                 'ai_analyzer' => $latestAiAnalyzer ? [
                     'complaint' => $latestAiAnalyzer->complaint,
                     'stress' => $latestAiAnalyzer->stress,
