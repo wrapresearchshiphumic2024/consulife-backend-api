@@ -157,6 +157,14 @@ class AIAnalyzerController extends Controller
                 'message' => 'Patient not found',
             ], 404);
         }
+        $userId = $patient->user->id ?? null;
+
+        if (!$userId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found for this patient',
+            ], 404);
+        }
 
         $analysis = AiAnalyzer::where('patient_id', $id)
             ->orderBy('created_at', 'desc')
@@ -172,7 +180,10 @@ class AIAnalyzerController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'AI analysis retrieved successfully',
-            'data' => $analysis,
+            'data' => [
+                'user_id' => $userId,
+                'analysis' => $analysis,
+            ],
         ]);
     }
 }
