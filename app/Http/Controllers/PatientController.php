@@ -419,9 +419,9 @@ class PatientController extends Controller
     }
 
     /**
-     * Analyze text using the SVM model.
+     * Analyze text using the AI model.
      */
-    public function aiAnalyzeSVM(Request $request)
+    public function aiAnalyze(Request $request)
     {
         $patient = Patient::where('user_id', Auth::id())->first();
         if (!$patient) {
