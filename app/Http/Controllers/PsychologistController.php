@@ -34,6 +34,31 @@ class PsychologistController extends Controller
             ->whereDate('created_at', now())
             ->count();
 
+        // Array untuk bulan
+        $months = [
+            1 => "January",
+            2 => "February",
+            3 => "March",
+            4 => "April",
+            5 => "May",
+            6 => "June",
+            7 => "July",
+            8 => "August",
+            9 => "September",
+            10 => "October",
+            11 => "November",
+            12 => "December"
+        ];
+
+        // Hitung jumlah pasien per bulan
+        $monthlyPatientCount = [];
+        foreach ($months as $monthNumber => $monthName) {
+            $monthlyPatientCount[$monthName] = Appointment::where('psychologist_id', $psychologistId)
+                ->whereMonth('created_at', $monthNumber)
+                ->distinct('patient_id')
+                ->count('patient_id');
+        }
+
         $consultations = $appointments->map(function ($appointment) {
             return [
                 'appointment_id' => $appointment->id,
@@ -56,9 +81,11 @@ class PsychologistController extends Controller
                 'total_weekly_consultation' => $totalweeklyConsultation,
                 'total_consultation' => $totalConsultation,
                 'today_ongoing_consultation' => $todayongoingConsultation,
+                'monthly_patient_count' => $monthlyPatientCount,
             ]
         ], 200);
     }
+
 
     public function getAllPatientsByPsychologist()
     {
