@@ -34,7 +34,6 @@ class PsychologistController extends Controller
             ->whereDate('created_at', now())
             ->count();
 
-        // Array untuk bulan
         $months = [
             1 => "January",
             2 => "February",
@@ -50,7 +49,6 @@ class PsychologistController extends Controller
             12 => "December"
         ];
 
-        // Hitung jumlah pasien per bulan
         $monthlyPatientCount = [];
         foreach ($months as $monthNumber => $monthName) {
             $monthlyPatientCount[$monthName] = Appointment::where('psychologist_id', $psychologistId)
