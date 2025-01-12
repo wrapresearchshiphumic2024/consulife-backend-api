@@ -13,12 +13,16 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
+            
             $table->date('date');
-            $table->time('time');
+            $table->time('start_time');
+            $table->time('end_time');
             $table->enum('status', ['waiting', 'ongoing', 'completed', 'canceled'])->default('waiting');
+            $table->text('note')->nullable();
             $table->timestamps();
             $table->foreignId('patient_id')->references('id')->on('patients');
             $table->foreignId('psychologist_id')->references('id')->on('psychologists');
+            $table->string('channel_id')->nullable();
         });
     }
 

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('day_id')->references('id')->on('days')->onDelete('cascade');
             $table->string('start');
             $table->string('end');
-            $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
         });
     }

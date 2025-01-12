@@ -26,6 +26,7 @@ return new class extends Migration
             $table->json('cv');
             $table->json('practice_license');
             $table->boolean('is_verified')->default(false);
+            $table->boolean('is_rejected')->default(false);
             $table->timestamps();
         });
     }
